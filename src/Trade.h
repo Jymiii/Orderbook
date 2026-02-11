@@ -4,9 +4,7 @@
 
 #ifndef ORDERBOOK_TRADE_H
 #define ORDERBOOK_TRADE_H
-
 #include "Usings.h"
-
 class Trade {
 public:
     Trade(OrderId bidId, OrderId askId, Price bidPrice, Price askPrice, Quantity quantity)

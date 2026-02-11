@@ -43,7 +43,7 @@ private:
     std::unordered_map<OrderId, OrderEntry> orders_;
 
     mutable std::mutex orderMutex_{};
-    std::thread gfdPruneThread_{[this]() { this->pruneStaleGoodForDay(); }};
+    std::thread gfdPruneThread_;
     std::atomic_bool shutdown_{false};
     std::condition_variable shutdownConditionVariable_{};
 
@@ -80,6 +80,11 @@ private:
 
 
 public:
+    Orderbook() : gfdPruneThread_{ [this] { pruneStaleGoodForDay(); } } { }
+    Orderbook(const Orderbook&) = delete;
+    Orderbook(Orderbook&&) = delete;
+    Orderbook operator=(const Orderbook& other) = delete;
+    Orderbook operator=(Orderbook&& other) = delete;
     ~Orderbook();
 
     Trades addOrder(const OrderPtr &order);

@@ -27,5 +27,4 @@ private:
     LevelInfos bids_;
     LevelInfos asks_;
 };
-
 #endif //ORDERBOOK_ORDERBOOKLEVELINFOS_H

@@ -4,12 +4,10 @@
 
 #ifndef ORDERBOOK_ORDERMODIFY_H
 #define ORDERBOOK_ORDERMODIFY_H
-
 #include "Usings.h"
 #include "Side.h"
 #include "OrderType.h"
 #include "Order.h"
-
 class OrderModify {
 public:
     OrderModify(OrderId id, Side side, Price price, Quantity quantity)
@@ -41,5 +39,4 @@ private:
     Price price_;
     Quantity quantity_;
 };
-
 #endif //ORDERBOOK_ORDERMODIFY_H

@@ -270,6 +270,8 @@ Trades Orderbook::matchOrders() {
     return {levelInfosBids, levelInfosAsks};
 }
 
+// ===== Event-Driven methods ======
+
 void Orderbook::onOrderMatched(Price price, Quantity quantity, bool fullMatch) {
     if (fullMatch) {
         updateLevelData(price, quantity, LevelData::Action::Remove);

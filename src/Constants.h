@@ -4,10 +4,8 @@
 
 #ifndef ORDERBOOK_CONSTANTS_H
 #define ORDERBOOK_CONSTANTS_H
-
 #include <numeric>
 #include "Usings.h"
-
 namespace Constants {
     struct TimeOfDay {
         int hour;
@@ -15,6 +13,5 @@ namespace Constants {
         int second;
     };
     auto constexpr inline InvalidPrice = std::numeric_limits<Price>::quiet_NaN();
-    TimeOfDay constexpr inline MarketCloseTime{16, 0, 0};
-}
+    TimeOfDay constexpr inline MarketCloseTime{16, 0, 0};}
 #endif //ORDERBOOK_CONSTANTS_H
