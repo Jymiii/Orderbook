@@ -7,7 +7,7 @@
 #include "orderbook/Orderbook.h"
 class OrderExecutor{
 public:
-    explicit OrderExecutor(Orderbook& orderbook){
+    explicit OrderExecutor(){
 
     }
 
