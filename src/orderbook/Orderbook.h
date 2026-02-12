@@ -21,11 +21,6 @@
 
 class Orderbook {
 private:
-    struct OrderEntry {
-        OrderPtr order_{nullptr};
-        OrderPtrs::iterator pos_;
-    };
-
     struct LevelData {
         Quantity quantity_{};
         Quantity count_{};
@@ -38,9 +33,9 @@ private:
     };
 
     std::unordered_map<Price, LevelData> levelData_;
-    std::map<Price, OrderPtrs, std::greater<>> bids_;
-    std::map<Price, OrderPtrs, std::less<>> asks_;
-    std::unordered_map<OrderId, OrderEntry> orders_;
+    std::map<Price, Orders, std::greater<>> bids_;
+    std::map<Price, Orders, std::less<>> asks_;
+    std::unordered_map<OrderId, OrdersIterator> orders_;
 
     mutable std::mutex orderMutex_{};
     std::thread gfdPruneThread_;
@@ -50,24 +45,24 @@ private:
     friend class PruneTestHelper;
 
     template<typename T>
-    void pruneStaleFillOrKill(std::map<Price, OrderPtrs, T> &orderMap) {
+    void pruneStaleFillOrKill(std::map<Price, Orders, T> &orderMap) {
         if (orderMap.empty()) return;
 
         auto &[_, orders] {*orderMap.begin()};
         auto &order = orders.front();
-        if (order->getType() == OrderType::FillAndKill) {
-            cancelOrderInternal(order->getId());
+        if (order.getType() == OrderType::FillAndKill) {
+            cancelOrderInternal(order.getId());
         }
-        else if (order->getType() == OrderType::FillOrKill) {
+        else if (order.getType() == OrderType::FillOrKill) {
             throw std::logic_error("There was a stale FOK order, should never be possible.");
         }
     }
 
     void onOrderMatched(Price price, Quantity quantity, bool fullMatch);
 
-    void onOrderAdded(const OrderPtr &order);
+    void onOrderAdded(const Order& order);
 
-    void onOrderCanceled(const OrderPtr &order);
+    void onOrderCanceled(const Order& order);
 
     void updateLevelData(Price price, Quantity quantity, LevelData::Action);
 
@@ -85,7 +80,7 @@ private:
 
     void pruneStaleGoodForNow();
 
-    Trades addOrderInternal(const OrderPtr &sharedPtr);
+    Trades addOrderInternal(Order order);
 
 
 public:
@@ -96,7 +91,7 @@ public:
     Orderbook operator=(Orderbook&& other) = delete;
     ~Orderbook();
 
-    Trades addOrder(const OrderPtr &order);
+    Trades addOrder(Order order);
 
     Trades modifyOrder(OrderModify orderModify);
 

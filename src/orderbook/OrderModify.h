@@ -29,8 +29,8 @@ public:
         return quantity_;
     }
 
-    [[nodiscard]] OrderPtr toOrderPtr(OrderType type) const {
-        return std::make_shared<Order>(getId(), type, getSide(), getPrice(), getQuantity());
+    [[nodiscard]] Order toOrder(OrderType type){
+        return {id_, type, side_, price_, quantity_};
     }
 
 private:

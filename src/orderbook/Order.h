@@ -59,6 +59,6 @@ private:
     Quantity remainingQuantity_{};
 };
 
-using OrderPtr = std::shared_ptr<Order>;
-using OrderPtrs = std::list<OrderPtr>;
+using Orders = std::list<Order>;
+using OrdersIterator = Orders::iterator;
 #endif //ORDERBOOK_ORDER_H

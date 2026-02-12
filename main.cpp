@@ -1,11 +1,11 @@
-#include "Orderbook/Orderbook.h"
+#include "orderbook/Orderbook.h"
 #include <iostream>
 #include <thread>
 
 int main() {
     Orderbook ob{};
 
-    ob.addOrder(std::make_shared<Order>(1, OrderType::GoodForDay, Side::Buy, 100, 10));
+    ob.addOrder({1, OrderType::GoodForDay, Side::Buy, 100, 10});
     std::cout << "Before: " << ob.size() << "\n";
 
     // Wait long enough for your prune to trigger (only practical if close is soon)
