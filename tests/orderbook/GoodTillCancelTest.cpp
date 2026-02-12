@@ -256,13 +256,13 @@ TEST(GoodTillCancel, ModifyOrder_AllowsNewTradesToHappen) {
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Buy, 102, 10));
     Trades trades = ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 30));
     EXPECT_EQ(1, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, { 2, 3, 102, 102, 10 }));
+    EXPECT_TRUE(hasTradeLike(trades, {2, 3, 102, 102, 10}));
     EXPECT_EQ(3, ob.size());
 
     trades = ob.modifyOrder({3, Side::Sell, 100, 20});
     EXPECT_EQ(2, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, { 0, 3, 100, 100, 10 }));
-    EXPECT_TRUE(hasTradeLike(trades, { 1, 3, 101, 100, 10 }));
+    EXPECT_TRUE(hasTradeLike(trades, {0, 3, 100, 100, 10}));
+    EXPECT_TRUE(hasTradeLike(trades, {1, 3, 101, 100, 10}));
 
     OrderbookLevelInfos info = ob.getOrderInfos();
     EXPECT_EQ(ob.size(), 0);

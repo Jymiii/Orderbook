@@ -52,17 +52,16 @@ private:
         auto &order = orders.front();
         if (order.getType() == OrderType::FillAndKill) {
             cancelOrderInternal(order.getId());
-        }
-        else if (order.getType() == OrderType::FillOrKill) {
+        } else if (order.getType() == OrderType::FillOrKill) {
             throw std::logic_error("There was a stale FOK order, should never be possible.");
         }
     }
 
     void onOrderMatched(Price price, Quantity quantity, bool fullMatch);
 
-    void onOrderAdded(const Order& order);
+    void onOrderAdded(const Order &order);
 
-    void onOrderCanceled(const Order& order);
+    void onOrderCanceled(const Order &order);
 
     void updateLevelData(Price price, Quantity quantity, LevelData::Action);
 
@@ -85,6 +84,7 @@ private:
 
 public:
     explicit Orderbook(bool startPruneThread = true);
+
     ~Orderbook();
 
     Trades addOrder(Order order);

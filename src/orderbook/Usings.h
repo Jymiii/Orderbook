@@ -3,6 +3,7 @@
 //
 #ifndef ORDERBOOK_USINGS_H
 #define ORDERBOOK_USINGS_H
+
 #include <vector>
 
 using Price = long double;

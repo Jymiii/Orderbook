@@ -10,9 +10,12 @@
 
 class OrderRegistry {
 public:
-    void onNew(const Order& o) {
+    void onNew(const Order &o) {
         auto [it, inserted] = live_.emplace(o.getId(), o);
-        if (!inserted) { it->second = o; return; }
+        if (!inserted) {
+            it->second = o;
+            return;
+        }
 
         idToIndex_[o.getId()] = ids_.size();
         ids_.push_back(o.getId());
@@ -20,7 +23,7 @@ public:
 
     void onCancel(OrderId id) { erase(id); }
 
-    void onModify(const Order& o) {
+    void onModify(const Order &o) {
         auto it = live_.find(o.getId());
         if (it == live_.end()) return;
         it->second = o;
@@ -28,7 +31,7 @@ public:
 
     bool empty() const { return ids_.empty(); }
 
-    std::optional<Order> randomLive(std::mt19937& rng) const {
+    std::optional<Order> randomLive(std::mt19937 &rng) const {
         if (ids_.empty()) return std::nullopt;
         std::uniform_int_distribution<std::size_t> dist(0, ids_.size() - 1);
 

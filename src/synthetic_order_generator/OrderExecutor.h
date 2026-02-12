@@ -19,15 +19,14 @@ public:
             : csv_path_{std::move(csv_path)} {}
 
     void run() {
-        if (csv_path_.empty()){
+        if (csv_path_.empty()) {
             runFromSimulation();
-        }
-        else{
+        } else {
             runFromCsv();
         }
     }
 
-    Orderbook& getOrderbook(){
+    Orderbook &getOrderbook() {
         return orderbook_;
     }
 
@@ -37,10 +36,11 @@ private:
     std::string csv_path_{};
 
     void runFromCsv() {}
+
     void runFromSimulation() {
         std::vector<Order> orders = generator_.generate();
         Timer timer;
-        for (const auto& order : orders) {
+        for (const auto &order: orders) {
             orderbook_.addOrder(order);
         }
         std::cout << "Processing " << orders.size() << " orders took " << timer.elapsed() << " seconds.";

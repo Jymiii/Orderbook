@@ -15,7 +15,8 @@
 class OrderGenerator {
 public:
     std::vector<Order> generate();
-    OrderGenerator(MarketState state, size_t ticks) : state_{ state }, ticks_ { ticks } {}
+
+    OrderGenerator(MarketState state, size_t ticks) : state_{state}, ticks_{ticks} {}
 
 private:
     OrderRegistry registry{};
@@ -27,8 +28,10 @@ private:
     std::mt19937 rng{dev()};
     std::normal_distribution<double> normal_distribution{0.0, 1.0};
     std::uniform_real_distribution<double> real_distribution{0.95, 1};
-    double getRandom() {return normal_distribution(rng);}
-    double getMidError() {return real_distribution(rng);}
+
+    double getRandom() { return normal_distribution(rng); }
+
+    double getMidError() { return real_distribution(rng); }
 
     void generateOrders(double mid, int count, std::vector<Order> &orders);
 };

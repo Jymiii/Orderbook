@@ -122,7 +122,7 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     onOrderCanceled(*listIt);
 
     const Price price = listIt->getPrice();
-    const Side side   = listIt->getSide();
+    const Side side = listIt->getSide();
 
     if (side == Side::Sell) {
         auto levelIt = asks_.find(price);
@@ -139,7 +139,6 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     }
     orders_.erase(it);
 }
-
 
 
 Trades Orderbook::addOrderInternal(Order order) {
@@ -236,8 +235,8 @@ Trades Orderbook::matchOrders() {
         if (highestBid < lowestAsk) break;
 
         while (!askOrders.empty() && !bidOrders.empty()) {
-            auto& bidOrder{bidOrders.front()};
-            auto& askOrder{askOrders.front()};
+            auto &bidOrder{bidOrders.front()};
+            auto &askOrder{askOrders.front()};
 
             Quantity tradedQuantity = std::min(bidOrder.getRemainingQuantity(), askOrder.getRemainingQuantity());
 
@@ -282,7 +281,7 @@ Trades Orderbook::matchOrders() {
     LevelInfos levelInfosBids, levelInfosAsks;
     auto createLevelInfo = [](Price price, const Orders &orders) {
         return LevelInfo{price, std::accumulate(orders.begin(), orders.end(), Quantity{0},
-                                                [](Quantity quantity, const Order& order) {
+                                                [](Quantity quantity, const Order &order) {
                                                     return quantity + order.getRemainingQuantity();
                                                 })};
     };
@@ -307,7 +306,7 @@ void Orderbook::onOrderMatched(Price price, Quantity quantity, bool fullMatch) {
     }
 }
 
-void Orderbook::onOrderAdded(const Order& order) {
+void Orderbook::onOrderAdded(const Order &order) {
     updateLevelData(order.getPrice(), order.getRemainingQuantity(), LevelData::Action::Add);
 }
 

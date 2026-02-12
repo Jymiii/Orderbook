@@ -4,7 +4,9 @@
 
 #ifndef ORDERBOOK_TRADE_H
 #define ORDERBOOK_TRADE_H
+
 #include "Usings.h"
+
 class Trade {
 public:
     Trade(OrderId bidId, OrderId askId, Price bidPrice, Price askPrice, Quantity quantity)
@@ -31,7 +33,7 @@ public:
         return quantity_;
     }
 
-    friend bool operator==(const Trade& a, const Trade& b) = default;
+    friend bool operator==(const Trade &a, const Trade &b) = default;
 
 private:
     OrderId bidId_;

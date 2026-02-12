@@ -5,11 +5,12 @@
 #include <cstdlib>
 
 static int id{0};
+
 std::vector<Order> OrderGenerator::generate() {
-    double mid   = state_.mid;
+    double mid = state_.mid;
     double sigma = state_.sigma;
     double drift = state_.drift;
-    double dt    = state_.dt;
+    double dt = state_.dt;
 
     std::vector<Order> orders{};
     orders.reserve(ticks_);
@@ -22,7 +23,7 @@ std::vector<Order> OrderGenerator::generate() {
     return orders;
 }
 
-void OrderGenerator::generateOrders(double mid, int count, std::vector<Order>& orders) {
+void OrderGenerator::generateOrders(double mid, int count, std::vector<Order> &orders) {
     if (count == 0) return;
 
     Side side = (count < 0) ? Side::Buy : Side::Sell;

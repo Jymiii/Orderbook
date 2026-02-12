@@ -4,8 +4,10 @@
 
 #ifndef ORDERBOOK_TESTHELPERS_H
 #define ORDERBOOK_TESTHELPERS_H
+
 #include "orderbook/Orderbook.h"
 #include <gtest/gtest.h>
+
 struct OrderFactory {
     OrderId id = 0;
 
@@ -16,6 +18,7 @@ struct OrderFactory {
     Order make(OrderId fixedId, OrderType type, Side side, Price price, Quantity qty) {
         return {fixedId, type, side, price, qty};
     }
+
     Order make(OrderId fixedId, Side side, Quantity qty) {
         return {fixedId, side, qty};
     }
@@ -27,4 +30,5 @@ inline bool hasTradeLike(const Trades &trades, const Trade &trade) {
                                    return other == trade;
                                });
 }
+
 #endif //ORDERBOOK_TESTHELPERS_H

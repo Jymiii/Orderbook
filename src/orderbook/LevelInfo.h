@@ -4,7 +4,9 @@
 
 #ifndef ORDERBOOK_LEVELINFO_H
 #define ORDERBOOK_LEVELINFO_H
+
 #include "Usings.h"
+
 struct LevelInfo {
     Price price_;
     Quantity quantity_;
@@ -14,11 +16,14 @@ struct LevelInfo {
         return os;
     }
 };
+
 using LevelInfos = std::vector<LevelInfo>;
-inline std::ostream& operator<<(std::ostream &os, const LevelInfos &infos) {
-    for (auto& info : infos){
+
+inline std::ostream &operator<<(std::ostream &os, const LevelInfos &infos) {
+    for (auto &info: infos) {
         os << info << '\n';
     }
     return os;
 }
+
 #endif //ORDERBOOK_LEVELINFO_H

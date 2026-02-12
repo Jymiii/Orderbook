@@ -4,19 +4,20 @@
 
 #ifndef ORDERBOOK_ORDER_H
 #define ORDERBOOK_ORDER_H
+
 #include "Usings.h"
 #include "Side.h"
 #include "OrderType.h"
 #include "Constants.h"
 #include <list>
+
 class Order {
 public:
     Order(OrderId id, OrderType type, Side side, Price price, Quantity quantity)
             : id_{id}, type_{type}, side_{side}, price_{price}, remainingQuantity_{quantity} {}
 
     Order(OrderId id, Side side, Quantity quantity) :
-        Order(id, OrderType::Market, side, Constants::InvalidPrice, quantity)
-    {}
+            Order(id, OrderType::Market, side, Constants::InvalidPrice, quantity) {}
 
     [[nodiscard]] OrderId getId() const {
         return id_;
@@ -46,6 +47,7 @@ public:
         assert(quantity <= getRemainingQuantity());
         remainingQuantity_ -= quantity;
     }
+
     void toGoodTillCancel(Price price) {
         type_ = OrderType::GoodTillCancel;
         price_ = price;

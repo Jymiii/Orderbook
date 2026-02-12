@@ -4,23 +4,23 @@
 #include "TestHelpers.h"
 
 TEST(OrderModify, StoresFieldsAndConvertsToOrder) {
-constexpr OrderId id = 42;
-constexpr Side side = Side::Buy;
-constexpr Price price = 123;
-constexpr Quantity qty = 7;
+    constexpr OrderId id = 42;
+    constexpr Side side = Side::Buy;
+    constexpr Price price = 123;
+    constexpr Quantity qty = 7;
 
-OrderModify mod{id, side, price, qty};
+    OrderModify mod{id, side, price, qty};
 
-EXPECT_EQ(mod.getId(), id);
-EXPECT_EQ(mod.getSide(), side);
-EXPECT_EQ(mod.getPrice(), price);
-EXPECT_EQ(mod.getQuantity(), qty);
+    EXPECT_EQ(mod.getId(), id);
+    EXPECT_EQ(mod.getSide(), side);
+    EXPECT_EQ(mod.getPrice(), price);
+    EXPECT_EQ(mod.getQuantity(), qty);
 
-auto order = mod.toOrder(OrderType::GoodTillCancel);
+    auto order = mod.toOrder(OrderType::GoodTillCancel);
 
-EXPECT_EQ(order.getId(), id);
-EXPECT_EQ(order.getSide(), side);
-EXPECT_EQ(order.getPrice(), price);
-EXPECT_EQ(order.getRemainingQuantity(), qty);
-EXPECT_EQ(order.getType(), OrderType::GoodTillCancel);
+    EXPECT_EQ(order.getId(), id);
+    EXPECT_EQ(order.getSide(), side);
+    EXPECT_EQ(order.getPrice(), price);
+    EXPECT_EQ(order.getRemainingQuantity(), qty);
+    EXPECT_EQ(order.getType(), OrderType::GoodTillCancel);
 }
