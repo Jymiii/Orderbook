@@ -1,15 +1,38 @@
 #include "orderbook/Orderbook.h"
 #include <iostream>
 #include <thread>
+#include <chrono> // for std::chrono functions
+
+class Timer
+{
+private:
+    // Type aliases to make accessing nested type easier
+    using Clock = std::chrono::steady_clock;
+    using Second = std::chrono::duration<double, std::ratio<1> >;
+
+    std::chrono::time_point<Clock> m_beg { Clock::now() };
+
+public:
+    void reset()
+    {
+        m_beg = Clock::now();
+    }
+
+    double elapsed() const
+    {
+        return std::chrono::duration_cast<Second>(Clock::now() - m_beg).count();
+    }
+};
+
 
 int main() {
     Orderbook ob{};
-
-    ob.addOrder({1, OrderType::GoodForDay, Side::Buy, 100, 10});
-    std::cout << "Before: " << ob.size() << "\n";
-
-    // Wait long enough for your prune to trigger (only practical if close is soon)
-    std::this_thread::sleep_for(std::chrono::seconds(10));
-
-    std::cout << "After: " << ob.size() << "\n";
+    Timer timer;
+    for (int i = 0; i < 10000000; i++){
+        ob.addOrder(Order{static_cast<OrderId>(i), OrderType::GoodTillCancel, Side::Buy, 50, 10});
+    }
+    for (int i = 0; i < 1000000; i++){
+        ob.addOrder(Order{static_cast<OrderId>(i), OrderType::GoodTillCancel, Side::Sell, 50, 100});
+    }
+    std::cout << timer.elapsed();
 }
