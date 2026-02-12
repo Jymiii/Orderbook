@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string>
 #include "Timer.h"
+#include <iostream>
 
 class OrderExecutor {
 public:
@@ -18,12 +19,12 @@ public:
             : csv_path_{std::move(csv_path)} {}
 
     void run() {
-        std::vector<Order> orders = generator_.generate();
-        Timer timer;
-        for (const auto& order : orders) {
-            orderbook_.addOrder(order);
+        if (csv_path_.empty()){
+            runFromSimulation();
         }
-        std::cout << "Processing " << orders.size() << " orders took " << timer.elapsed() << " seconds.";
+        else{
+            runFromCsv();
+        }
     }
 
     Orderbook& getOrderbook(){
@@ -36,7 +37,14 @@ private:
     std::string csv_path_{};
 
     void runFromCsv() {}
-    void runFromSimulation() {}
+    void runFromSimulation() {
+        std::vector<Order> orders = generator_.generate();
+        Timer timer;
+        for (const auto& order : orders) {
+            orderbook_.addOrder(order);
+        }
+        std::cout << "Processing " << orders.size() << " orders took " << timer.elapsed() << " seconds.";
+    }
 };
 
 #endif // ORDERBOOK_ORDEREXECUTOR_H
