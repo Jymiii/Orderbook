@@ -5,7 +5,7 @@
 #define ORDERBOOK_USINGS_H
 #include <vector>
 
-using Price = std::int64_t;
+using Price = long double;
 using Quantity = std::uint64_t;
 using OrderId = std::uint64_t;
 using OrderIds = std::vector<OrderId>;

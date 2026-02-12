@@ -85,10 +85,6 @@ private:
 
 public:
     explicit Orderbook(bool startPruneThread = true);
-    Orderbook(const Orderbook&) = delete;
-    Orderbook(Orderbook&&) = delete;
-    Orderbook operator=(const Orderbook& other) = delete;
-    Orderbook operator=(Orderbook&& other) = delete;
     ~Orderbook();
 
     Trades addOrder(Order order);
