@@ -20,7 +20,13 @@ target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # ---- Main executable (NO tests here) ----
 add_executable(Orderbook main.cpp
-        src/synthetic_order_generator/OrderExecutor.h)
+        src/synthetic_order_generator/OrderExecutor.h
+        src/synthetic_order_generator/OrderGenerator.cpp
+        src/synthetic_order_generator/OrderGenerator.h
+        src/synthetic_order_generator/MarketState.h
+        src/synthetic_order_generator/OrderEvent.h
+        src/synthetic_order_generator/OrderRegistry.h
+        src/synthetic_order_generator/Timer.h)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
 # ---- Tests ----

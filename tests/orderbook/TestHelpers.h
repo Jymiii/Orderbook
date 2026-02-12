@@ -9,15 +9,15 @@
 struct OrderFactory {
     OrderId id = 0;
 
-    OrderPtr make(OrderType type, Side side, Price price, Quantity qty) {
-        return std::make_shared<Order>(id++, type, side, price, qty);
+    Order make(OrderType type, Side side, Price price, Quantity qty) {
+        return {id++, type, side, price, qty};
     }
 
-    OrderPtr make(OrderId fixedId, OrderType type, Side side, Price price, Quantity qty) {
-        return std::make_shared<Order>(fixedId, type, side, price, qty);
+    Order make(OrderId fixedId, OrderType type, Side side, Price price, Quantity qty) {
+        return {fixedId, type, side, price, qty};
     }
-    OrderPtr make(OrderId fixedId, Side side, Quantity qty) {
-        return std::make_shared<Order>(fixedId, side, qty);
+    Order make(OrderId fixedId, Side side, Quantity qty) {
+        return {fixedId, side, qty};
     }
 };
 

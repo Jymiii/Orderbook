@@ -1,0 +1,13 @@
+//
+// Created by Jimi van der Meer on 12/02/2026.
+//
+
+#ifndef ORDERBOOK_MARKETSTATE_H
+#define ORDERBOOK_MARKETSTATE_H
+struct MarketState {
+    double mid = 100.0;
+    double drift = 0.1;
+    double sigma = 0.3;
+    double dt = 0.00001;
+};
+#endif //ORDERBOOK_MARKETSTATE_H
