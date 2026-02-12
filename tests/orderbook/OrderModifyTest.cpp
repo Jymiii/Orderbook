@@ -1,8 +1,7 @@
 //
 // Created by Jimi van der Meer on 11/02/2026.
 //
-#include <gtest/gtest.h>
-#include "OrderModify.h"
+#include "TestHelpers.h"
 
 TEST(OrderModify, StoresFieldsAndConvertsToOrderPtr) {
 constexpr OrderId id = 42;

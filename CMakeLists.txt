@@ -14,20 +14,26 @@ FetchContent_MakeAvailable(googletest)
 
 # ---- Library: code under test ----
 add_library(orderbook_lib
-        src/Orderbook.cpp
+        src/orderbook/Orderbook.cpp
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # ---- Main executable (NO tests here) ----
-add_executable(Orderbook main.cpp)
+add_executable(Orderbook main.cpp
+        src/synthetic_order_generator/OrderExecutor.h)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
 # ---- Tests ----
 enable_testing()
 
 add_executable(OrderbookTests
-        tests/GoodTillCancelTest.cpp
-        tests/OrderModifyTest.cpp
+        tests/orderbook/GoodTillCancelTest.cpp
+        tests/orderbook/OrderModifyTest.cpp
+        tests/orderbook/MarketOrderTest.cpp
+        tests/orderbook/TestHelpers.h
+        tests/orderbook/FillOrKillTest.cpp
+        tests/orderbook/FillAndKillTest.cpp
+        tests/orderbook/GoodForDayTest.cpp
 )
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
 

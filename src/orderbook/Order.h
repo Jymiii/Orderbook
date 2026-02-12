@@ -51,10 +51,6 @@ public:
         price_ = price;
     }
 
-    void toFillAndKill() {
-        type_ = OrderType::FillAndKill;
-    }
-
 private:
     OrderId id_{};
     OrderType type_;

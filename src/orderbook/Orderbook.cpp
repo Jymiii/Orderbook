@@ -7,47 +7,64 @@
 // ===== Lifecycle / background thread =====
 
 void Orderbook::pruneStaleGoodForDay() {
+    while (true) {
+        if (waitTillPruneTime()) {
+            return;
+        }
+        pruneStaleGoodForNow();
+    }
+}
+
+void Orderbook::pruneStaleGoodForNow() {
+    OrderIds stale;
+    {
+        std::scoped_lock lock{orderMutex_};
+        for (const auto &[id, orderPtr]: orders_) {
+            if (orderPtr.order_->getType() == OrderType::GoodForDay)
+                stale.push_back(id);
+        }
+    }
+    cancelOrders(stale);
+}
+
+bool Orderbook::waitTillPruneTime() {
     using namespace std::chrono;
 
-    while (true) {
-        auto now = system_clock::now();
-        std::time_t t = system_clock::to_time_t(now);
+    auto now = system_clock::now();
+    std::time_t t = system_clock::to_time_t(now);
 
-        std::tm tm{};
-        localtime_r(&t, &tm);
+    std::tm tm{};
+    localtime_r(&t, &tm);
 
-        tm.tm_hour = Constants::MarketCloseTime.hour;
-        tm.tm_min = Constants::MarketCloseTime.minute;
-        tm.tm_sec = Constants::MarketCloseTime.second;
+    tm.tm_hour = Constants::MarketCloseTime.hour;
+    tm.tm_min = Constants::MarketCloseTime.minute;
+    tm.tm_sec = Constants::MarketCloseTime.second;
 
-        auto close_tp = system_clock::from_time_t(std::mktime(&tm));
-        if (close_tp <= now) {
-            tm.tm_mday += 1;
-            close_tp = system_clock::from_time_t(std::mktime(&tm));
-        }
-        auto until = close_tp - now;
+    auto close_tp = system_clock::from_time_t(std::mktime(&tm));
+    if (close_tp <= now) {
+        tm.tm_mday += 1;
+        close_tp = system_clock::from_time_t(std::mktime(&tm));
+    }
+    auto until = close_tp - now;
 
-        {
-            std::unique_lock<std::mutex> lock(orderMutex_);
+    {
+        std::unique_lock<std::mutex> lock(orderMutex_);
 
-            shutdownConditionVariable_.wait_for(
-                    lock, until,
-                    [&] { return shutdown_; }
-            );
+        shutdownConditionVariable_.wait_for(
+                lock, until,
+                [&] { return shutdown_; }
+        );
 
-            if (shutdown_) return;
-        }
+        if (shutdown_) return true;
+    }
+    return false;
+}
 
-
-        OrderIds stale;
-        {
-            std::scoped_lock lock{orderMutex_};
-            for (const auto &[id, orderPtr]: orders_) {
-                if (orderPtr.order_->getType() == OrderType::GoodForDay)
-                    stale.push_back(id);
-            }
-        }
-        cancelOrders(stale);
+Orderbook::Orderbook(bool startPruneThread) {
+    if (startPruneThread) {
+        gfdPruneThread_ = std::thread([this] {
+            pruneStaleGoodForDay();
+        });
     }
 }
 
@@ -142,8 +159,6 @@ Trades Orderbook::addOrderInternal(const OrderPtr &order) {
     if (order->getType() == OrderType::FillOrKill) {
         if (!canFullyFill(order->getSide(), order->getPrice(), order->getRemainingQuantity())) {
             return {};
-        } else {
-            order->toFillAndKill();
         }
     }
 
@@ -246,11 +261,10 @@ Trades Orderbook::matchOrders() {
 
         }
         if (bidOrders.empty()) { bids_.erase(highestBid); }
-        else { pruneStaleFillOrKill(bids_); }
-
         if (askOrders.empty()) asks_.erase(lowestAsk);
-        else pruneStaleFillOrKill(asks_);
     }
+    pruneStaleFillOrKill(bids_);
+    pruneStaleFillOrKill(asks_);
     return trades;
 }
 

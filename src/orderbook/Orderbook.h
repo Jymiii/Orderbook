@@ -47,6 +47,8 @@ private:
     bool shutdown_{false};
     std::condition_variable shutdownConditionVariable_{};
 
+    friend class PruneTestHelper;
+
     template<typename T>
     void pruneStaleFillOrKill(std::map<Price, OrderPtrs, T> &orderMap) {
         if (orderMap.empty()) return;
@@ -54,7 +56,10 @@ private:
         auto &[_, orders] {*orderMap.begin()};
         auto &order = orders.front();
         if (order->getType() == OrderType::FillAndKill) {
-            cancelOrder(order->getId());
+            cancelOrderInternal(order->getId());
+        }
+        else if (order->getType() == OrderType::FillOrKill) {
+            throw std::logic_error("There was a stale FOK order, should never be possible.");
         }
     }
 
@@ -70,18 +75,21 @@ private:
 
     Trades matchOrders();
 
-    void pruneStaleGoodForDay();
-
     void cancelOrders(const OrderIds &orderIds);
 
     void cancelOrderInternal(OrderId orderId);
+
+    void pruneStaleGoodForDay();
+
+    bool waitTillPruneTime();
+
+    void pruneStaleGoodForNow();
 
     Trades addOrderInternal(const OrderPtr &sharedPtr);
 
 
 public:
-    Orderbook() : gfdPruneThread_{ [this] { pruneStaleGoodForDay(); } } { }
-    Orderbook(bool testEnv) {}
+    explicit Orderbook(bool startPruneThread = true);
     Orderbook(const Orderbook&) = delete;
     Orderbook(Orderbook&&) = delete;
     Orderbook operator=(const Orderbook& other) = delete;

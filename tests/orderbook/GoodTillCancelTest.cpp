@@ -1,28 +1,7 @@
-#include <gtest/gtest.h>
-#include "Orderbook.h"
-#include "OrderModify.h"
 #include <algorithm>
+#include "TestHelpers.h"
 
-struct OrderFactory {
-    OrderId id = 0;
-
-    OrderPtr make(OrderType type, Side side, Price price, Quantity qty) {
-        return std::make_shared<Order>(id++, type, side, price, qty);
-    }
-
-    OrderPtr make(OrderId fixedId, OrderType type, Side side, Price price, Quantity qty) {
-        return std::make_shared<Order>(fixedId, type, side, price, qty);
-    }
-};
-
-bool hasTradeLike(const Trades &trades, const Trade &trade) {
-    return std::ranges::any_of(trades,
-                               [&trade](const Trade &other) {
-                                   return other == trade;
-                               });
-}
-
-TEST(Orderbook, Empty) {
+TEST(GoodTillCancel, Empty) {
     Orderbook ob{};
     auto info = ob.getOrderInfos();
 
@@ -31,7 +10,7 @@ TEST(Orderbook, Empty) {
     EXPECT_EQ(info.getAsks().size(), 0);
 }
 
-TEST(Orderbook, AddBuys_AggregatesLevels) {
+TEST(GoodTillCancel, AddBuys_AggregatesLevels) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -68,7 +47,7 @@ TEST(Orderbook, AddBuys_AggregatesLevels) {
     EXPECT_EQ(it->quantity_, 2);
 }
 
-TEST(Orderbook, AddSells_AggregatesLevels) {
+TEST(GoodTillCancel, AddSells_AggregatesLevels) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -105,7 +84,7 @@ TEST(Orderbook, AddSells_AggregatesLevels) {
     EXPECT_EQ(it->quantity_, 10);
 }
 
-TEST(Orderbook, Matching_ProducesTradesAndUpdatesBook) {
+TEST(GoodTillCancel, Matching_ProducesTradesAndUpdatesBook) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -160,7 +139,7 @@ TEST(Orderbook, Matching_ProducesTradesAndUpdatesBook) {
     EXPECT_EQ(ob.size(), 1);
 }
 
-TEST(Orderbook, CancelingChangesBook) {
+TEST(GoodTillCancel, CancelingChangesBook) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -188,7 +167,7 @@ TEST(Orderbook, CancelingChangesBook) {
     EXPECT_EQ(4, ob.size());
 }
 
-TEST(Orderbook, CancelingStopsPotentialTrades) {
+TEST(GoodTillCancel, CancelingStopsPotentialTrades) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -217,7 +196,7 @@ TEST(Orderbook, CancelingStopsPotentialTrades) {
     EXPECT_TRUE(infos.getBids().empty());
 }
 
-TEST(Orderbook, ModifyOrder_UpdatesPriceAndQuantity) {
+TEST(GoodTillCancel, ModifyOrder_UpdatesPriceAndQuantity) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -241,7 +220,7 @@ TEST(Orderbook, ModifyOrder_UpdatesPriceAndQuantity) {
     EXPECT_EQ(info.getBids()[0].quantity_, 7);
 }
 
-TEST(Orderbook, ModifyOrder_UnknownId_DoesNothing) {
+TEST(GoodTillCancel, ModifyOrder_UnknownId_DoesNothing) {
     OrderFactory f;
     Orderbook ob{};
 
@@ -265,4 +244,28 @@ TEST(Orderbook, ModifyOrder_UnknownId_DoesNothing) {
     EXPECT_EQ(after.getBids()[0].quantity_, before.getBids()[0].quantity_);
     EXPECT_EQ(after.getAsks()[0].price_, before.getAsks()[0].price_);
     EXPECT_EQ(after.getAsks()[0].quantity_, before.getAsks()[0].quantity_);
+}
+
+TEST(GoodTillCancel, ModifyOrder_AllowsNewTradesToHappen) {
+    OrderFactory f;
+    Orderbook ob{};
+
+    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Buy, 100, 10));
+    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 101, 10));
+
+    ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Buy, 102, 10));
+    Trades trades = ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 30));
+    EXPECT_EQ(1, trades.size());
+    EXPECT_TRUE(hasTradeLike(trades, { 2, 3, 102, 102, 10 }));
+    EXPECT_EQ(3, ob.size());
+
+    trades = ob.modifyOrder({3, Side::Sell, 100, 20});
+    EXPECT_EQ(2, trades.size());
+    EXPECT_TRUE(hasTradeLike(trades, { 0, 3, 100, 100, 10 }));
+    EXPECT_TRUE(hasTradeLike(trades, { 1, 3, 101, 100, 10 }));
+
+    OrderbookLevelInfos info = ob.getOrderInfos();
+    EXPECT_EQ(ob.size(), 0);
+    EXPECT_TRUE(info.getAsks().empty());
+    EXPECT_TRUE(info.getBids().empty());
 }
