@@ -44,7 +44,7 @@ private:
 
     mutable std::mutex orderMutex_{};
     std::thread gfdPruneThread_;
-    std::atomic_bool shutdown_{false};
+    bool shutdown_{false};
     std::condition_variable shutdownConditionVariable_{};
 
     template<typename T>
@@ -81,6 +81,7 @@ private:
 
 public:
     Orderbook() : gfdPruneThread_{ [this] { pruneStaleGoodForDay(); } } { }
+    Orderbook(bool testEnv) {}
     Orderbook(const Orderbook&) = delete;
     Orderbook(Orderbook&&) = delete;
     Orderbook operator=(const Orderbook& other) = delete;

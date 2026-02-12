@@ -11,6 +11,28 @@ public:
             : bidId_{bidId}, askId_{askId}, bidPrice_{bidPrice}, askPrice_{askPrice},
               quantity_{quantity} {}
 
+    OrderId getBidId() const {
+        return bidId_;
+    }
+
+    OrderId getAskId() const {
+        return askId_;
+    }
+
+    Price getBidPrice() const {
+        return bidPrice_;
+    }
+
+    Price getAskPrice() const {
+        return askPrice_;
+    }
+
+    Quantity getQuantity() const {
+        return quantity_;
+    }
+
+    friend bool operator==(const Trade& a, const Trade& b) = default;
+
 private:
     OrderId bidId_;
     OrderId askId_;

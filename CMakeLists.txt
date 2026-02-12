@@ -1,17 +1,35 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.25)  # 4.0 is fine if you have it, but 3.25 is more common
 project(Orderbook)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(Orderbook main.cpp
-        src/OrderType.h
-        src/Side.h
-        src/LevelInfo.h
-        src/OrderbookLevelInfos.h
-        src/Order.h
-        src/OrderModify.h
-        src/Trade.h
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# ---- Library: code under test ----
+add_library(orderbook_lib
         src/Orderbook.cpp
-        src/Orderbook.h
-        src/Usings.h
-        src/Constants.h)
+)
+target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# ---- Main executable (NO tests here) ----
+add_executable(Orderbook main.cpp)
+target_link_libraries(Orderbook PRIVATE orderbook_lib)
+
+# ---- Tests ----
+enable_testing()
+
+add_executable(OrderbookTests
+        tests/GoodTillCancelTest.cpp
+        tests/OrderModifyTest.cpp
+)
+target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(OrderbookTests)

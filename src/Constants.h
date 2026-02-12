@@ -13,5 +13,5 @@ namespace Constants {
         int second;
     };
     auto constexpr inline InvalidPrice = std::numeric_limits<Price>::quiet_NaN();
-    TimeOfDay constexpr inline MarketCloseTime{16, 0, 0};}
+    TimeOfDay constexpr inline MarketCloseTime{00, 00, 20};}
 #endif //ORDERBOOK_CONSTANTS_H

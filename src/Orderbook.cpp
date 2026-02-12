@@ -28,12 +28,16 @@ void Orderbook::pruneStaleGoodForDay() {
         auto until = close_tp - now;
 
         {
-            std::unique_lock lock{orderMutex_};
-            if (shutdown_.load(std::memory_order_acquire)
-                || shutdownConditionVariable_.wait_for(lock, until) == std::cv_status::no_timeout) {
-                return;
-            }
+            std::unique_lock<std::mutex> lock(orderMutex_);
+
+            shutdownConditionVariable_.wait_for(
+                    lock, until,
+                    [&] { return shutdown_; }
+            );
+
+            if (shutdown_) return;
         }
+
 
         OrderIds stale;
         {
@@ -48,10 +52,14 @@ void Orderbook::pruneStaleGoodForDay() {
 }
 
 Orderbook::~Orderbook() {
-    shutdown_.store(true, std::memory_order_release);
-    shutdownConditionVariable_.notify_one();
-    gfdPruneThread_.join();
+    {
+        std::scoped_lock lock(orderMutex_);
+        shutdown_ = true;
+    }
+    shutdownConditionVariable_.notify_all();
+    if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
 }
+
 
 // ===== Public API =====
 
@@ -113,7 +121,7 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
 }
 
 Trades Orderbook::addOrderInternal(const OrderPtr &order) {
-    if (orders_.contains(order->getId())) {
+    if (order->getRemainingQuantity() == 0 || orders_.contains(order->getId())) {
         return {};
     }
 
