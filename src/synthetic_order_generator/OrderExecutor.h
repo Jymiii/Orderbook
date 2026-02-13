@@ -13,21 +13,23 @@ class OrderExecutor {
 public:
     OrderExecutor() = default;
 
-    OrderExecutor(MarketState state, size_t ticks);
+    OrderExecutor(MarketState state, size_t ticks, std::string persist_path = "");
 
-    void run(std::string csv_path);
+    void run(std::string csv_path = "");
 
     Orderbook &getOrderbook();
 
 private:
     Orderbook orderbook_{false};
     OrderGenerator generator_{MarketState{}, 100000};
+    std::string persist_path_{};
 
     void runFromCsv(std::string csv_path);
 
     static std::vector<Order> getOrdersFromCsv(std::string path);
 
     void executeOrders(std::vector<Order> &orders);
+    void executeOrdersPersist(std::vector<Order> &orders);
 
     void runFromSimulation();
 };

@@ -6,8 +6,8 @@
 #include <fstream>
 #include <iostream>
 
-OrderExecutor::OrderExecutor(MarketState state, size_t ticks)
-        : generator_{state, ticks} {}
+OrderExecutor::OrderExecutor(MarketState state, size_t ticks, std::string persist_path)
+        : generator_{state, ticks}, persist_path_{ persist_path } {}
 
 void OrderExecutor::run(std::string csv_path) {
     if (csv_path.empty()) {
@@ -30,9 +30,21 @@ void OrderExecutor::executeOrders(std::vector<Order> &orders) {
     std::cout << "Processing " << orders.size() << " orders took " << duration << " seconds.";
 }
 
+void OrderExecutor::executeOrdersPersist(std::vector<Order> &orders) {
+    Timer timer;
+    std::ofstream file { persist_path_ };
+    for (const auto &order: orders) {
+        orderbook_.addOrder(order);
+        file << order;
+    }
+    auto duration = timer.elapsed();
+    std::cout << "Processing " << orders.size() << " orders took " << duration << " seconds.";
+}
+
 void OrderExecutor::runFromSimulation() {
     std::vector<Order> orders = generator_.generate();
-    executeOrders(orders);
+    if (persist_path_.empty()) executeOrders(orders);
+    else executeOrdersPersist(orders);
 }
 
 void OrderExecutor::runFromCsv(std::string csv_path) {

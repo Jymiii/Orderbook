@@ -30,9 +30,11 @@ void OrderGenerator::generateOrders(double mid, int count, std::vector<Order> &o
     int n = std::abs(count);
 
     for (int i = 0; i < n; ++i) {
-        double error = getMidError();
-        if (side == Side::Sell) error = 1 / error;
-        const double raw = Constants::TICK_MULTIPLIER * mid * error;
+        double uSample = getUSample();
+        const double d = -state_.b * std::log(1 - 2 * std::abs(uSample));
+        double spread = (side == Side::Sell) ? std::exp(d) : std::exp(-d);
+
+        const double raw = Constants::TICK_MULTIPLIER * mid * spread;
         const int32_t px = std::max<int32_t>(1, static_cast<int32_t>(std::llround(raw)));
         orders.emplace_back(id++, OrderType::GoodTillCancel, side, px, 5);
     }

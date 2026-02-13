@@ -27,11 +27,11 @@ private:
     static size_t id_;
     std::mt19937 rng{dev()};
     std::normal_distribution<double> normal_distribution{0.0, 1.0};
-    std::uniform_real_distribution<double> real_distribution{0.95, 1};
+    std::uniform_real_distribution<double> U{-0.499999999, 0.5};
 
     double getRandom() { return normal_distribution(rng); }
 
-    double getMidError() { return real_distribution(rng); }
+    double getUSample() { return U(rng); }
 
     void generateOrders(double mid, int count, std::vector<Order> &orders);
 };
