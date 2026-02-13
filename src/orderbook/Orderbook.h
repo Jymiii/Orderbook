@@ -33,8 +33,8 @@ private:
     };
 
     std::unordered_map<Price, LevelData> levelData_;
-    std::map<Price, Orders, std::greater<>> bids_;
-    std::map<Price, Orders, std::less<>> asks_;
+    std::vector<Level> bids_;
+    std::vector<Level> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
 
     mutable std::mutex orderMutex_{};
@@ -43,19 +43,6 @@ private:
     std::condition_variable shutdownConditionVariable_{};
 
     friend class PruneTestHelper;
-
-    template<typename T>
-    void pruneStaleFillOrKill(std::map<Price, Orders, T> &orderMap) {
-        if (orderMap.empty()) return;
-
-        auto &[_, orders] {*orderMap.begin()};
-        auto &order = orders.front();
-        if (order.getType() == OrderType::FillAndKill) {
-            cancelOrderInternal(order.getId());
-        } else if (order.getType() == OrderType::FillOrKill) {
-            throw std::logic_error("There was a stale FOK order, should never be possible.");
-        }
-    }
 
     void onOrderMatched(Price price, Quantity quantity, bool fullMatch);
 
@@ -71,6 +58,8 @@ private:
 
     void cancelOrders(const OrderIds &orderIds);
 
+    void pruneStaleFillOrKill(std::vector<Level> &levels);
+
     void cancelOrderInternal(OrderId orderId);
 
     void pruneStaleGoodForDay();
@@ -81,6 +70,43 @@ private:
 
     Trades addOrderInternal(Order order);
 
+    template <class T, class Compare>
+    Level& insertOrGet(Price price, T& levels, Compare comp) {
+        auto it = std::lower_bound(levels.begin(), levels.end(), price, [comp](const auto& p, Price price) {
+            return comp(p.price_, price);
+        });
+
+        if (it == levels.end() || it->price_ != price){
+            it = levels.insert(it, Level{price, {}});
+        }
+        return *it;
+    }
+
+    template <class T, class Compare>
+    typename T::iterator get(Price price, T& levels, Compare comp) {
+        auto it = std::lower_bound(levels.begin(), levels.end(), price, [comp](const auto& p, Price price) {
+            return comp(p.price_, price);
+        });
+
+        assert(it != levels.end() && it->price_ == price);
+        return it;
+    }
+
+    template<class T, class Compare>
+    bool canFullyFill(T& levels, Price price, Quantity quantity, Compare comp) {
+        if (levels.empty()) return false;
+        auto it = levels.rbegin();
+        while (it != levels.rend()) {
+            const auto &[bestPrice, orders] = *it;
+            auto levelQuantity = levelData_.at(bestPrice).quantity_;
+            if (comp(bestPrice, price)) {
+                if (quantity <= levelQuantity) return true;
+                quantity -= levelQuantity;
+            } else { break; }
+            it = std::next(it);
+        }
+        return false;
+    }
 
 public:
     explicit Orderbook(bool startPruneThread = true);

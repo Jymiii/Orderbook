@@ -2,7 +2,7 @@
 #include "synthetic_order_generator/OrderExecutor.h"
 
 int main() {
-    OrderExecutor executor{MarketState{}, 100000};
-    executor.run("../data/orders.txt");
+    OrderExecutor executor{MarketState{}, 1000000};
+    executor.run();
     return 0;
 }

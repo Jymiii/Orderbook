@@ -66,7 +66,11 @@ private:
     Price price_{};
     Quantity remainingQuantity_{};
 };
-
 using Orders = std::list<Order>;
-using OrdersIterator = Orders::iterator;
+using OrdersIterator = std::list<Order>::iterator;
+
+struct Level {
+    Price price_;
+    Orders orders_;
+};
 #endif //ORDERBOOK_ORDER_H
