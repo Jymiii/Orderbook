@@ -9,6 +9,7 @@
 #include "Side.h"
 #include "OrderType.h"
 #include "Constants.h"
+#include <iostream>
 #include <list>
 
 class Order {
@@ -17,7 +18,7 @@ public:
             : id_{id}, type_{type}, side_{side}, price_{price}, remainingQuantity_{quantity} {}
 
     Order(OrderId id, Side side, Quantity quantity) :
-            Order(id, OrderType::Market, side, Constants::InvalidPrice, quantity) {}
+            Order(id, OrderType::Market, side, Constants::INVALID_PRICE, quantity) {}
 
     [[nodiscard]] OrderId getId() const {
         return id_;
@@ -51,6 +52,11 @@ public:
     void toGoodTillCancel(Price price) {
         type_ = OrderType::GoodTillCancel;
         price_ = price;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const Order &order) {
+        return os << order.id_ << "," << std::to_underlying(order.type_) << "," << std::to_underlying(order.side_)
+                  << "," << order.price_ << "," << order.remainingQuantity_ << "\n";
     }
 
 private:

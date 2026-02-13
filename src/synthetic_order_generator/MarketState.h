@@ -7,7 +7,7 @@
 struct MarketState {
     double mid = 100.0;
     double drift = 0.1;
-    double sigma = 0.3;
-    double dt = 0.00001;
+    double sigma = 0.2;
+    double dt = 0.0001;
 };
 #endif //ORDERBOOK_MARKETSTATE_H

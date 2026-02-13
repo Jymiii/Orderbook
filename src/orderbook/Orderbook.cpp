@@ -66,6 +66,7 @@ Orderbook::Orderbook(bool startPruneThread) {
             pruneStaleGoodForDay();
         });
     }
+    orders_.reserve(200000);
 }
 
 Orderbook::~Orderbook() {
@@ -172,7 +173,7 @@ Trades Orderbook::addOrderInternal(Order order) {
     orders.push_back(std::move(order));
     auto iterator = std::prev(orders.end());
 
-    orders_.insert({iterator->getId(), iterator});
+    orders_.emplace(iterator->getId(), iterator);
 
     onOrderAdded(*iterator);
 
@@ -182,7 +183,7 @@ Trades Orderbook::addOrderInternal(Order order) {
 // ===== Matching / eligibility =====
 
 bool Orderbook::canMatch(Side side, Price price) {
-    if (price == Constants::InvalidPrice) return true;
+    if (price == Constants::INVALID_PRICE) return true;
 
     if (side == Side::Sell) {
         if (bids_.empty()) return false;
@@ -223,7 +224,6 @@ Trades Orderbook::matchOrders() {
     if (bids_.empty() || asks_.empty()) return {};
 
     Trades trades;
-    trades.reserve(orders_.size());
 
     while (true) {
         if (bids_.empty() || asks_.empty()) {

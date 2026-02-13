@@ -6,7 +6,7 @@
 
 #include <vector>
 
-using Price = long double;
+using Price = std::int_fast32_t;
 using Quantity = std::uint64_t;
 using OrderId = std::uint64_t;
 using OrderIds = std::vector<OrderId>;
