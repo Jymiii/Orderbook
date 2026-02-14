@@ -3,13 +3,6 @@
 //
 #include "TestHelpers.h"
 
-class PruneTestHelper {
-public:
-    static void pruneStaleGoodForNow(Orderbook &ob) {
-        ob.pruneStaleGoodForNow();
-    }
-};
-
 TEST(GoodForDay, PruneStaleGoodForNow_RemovesOnlyGFD) {
     OrderFactory f;
     Orderbook ob{false};

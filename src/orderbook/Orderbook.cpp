@@ -236,7 +236,7 @@ Trades Orderbook::matchOrders() {
             auto &bidOrder{bidOrders.front()};
             auto &askOrder{askOrders.front()};
 
-            Quantity tradedQuantity = std::min(bidOrder.getRemainingQuantity(), askOrder.getRemainingQuantity());
+            const Quantity tradedQuantity = std::min(bidOrder.getRemainingQuantity(), askOrder.getRemainingQuantity());
 
             bidOrder.fill(tradedQuantity);
             askOrder.fill(tradedQuantity);
@@ -249,6 +249,9 @@ Trades Orderbook::matchOrders() {
             const bool bidFilled = bidOrder.isFilled();
             const bool askFilled = askOrder.isFilled();
 
+            onOrderMatched(bidOrder.getPrice(), tradedQuantity, bidFilled);
+            onOrderMatched(askOrder.getPrice(), tradedQuantity, askFilled);
+
             if (bidFilled) {
                 orders_.erase(bidOrder.getId());
                 bidOrders.pop_front();
@@ -257,9 +260,6 @@ Trades Orderbook::matchOrders() {
                 orders_.erase(askOrder.getId());
                 askOrders.pop_front();
             }
-
-            onOrderMatched(bidOrder.getPrice(), tradedQuantity, bidFilled);
-            onOrderMatched(askOrder.getPrice(), tradedQuantity, askFilled);
 
         }
         if (bidOrders.empty()) { bids_.pop_back(); }

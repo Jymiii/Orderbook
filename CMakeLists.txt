@@ -41,6 +41,7 @@ add_executable(OrderbookTests
         tests/orderbook/FillOrKillTest.cpp
         tests/orderbook/FillAndKillTest.cpp
         tests/orderbook/GoodForDayTest.cpp
+        tests/orderbook/AdditionalTests.cpp
 )
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
 
