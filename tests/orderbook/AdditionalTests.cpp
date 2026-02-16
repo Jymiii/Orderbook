@@ -59,7 +59,7 @@ TEST(Guards, DuplicateOrderId_SecondIsIgnored) {
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getBids().size());
     EXPECT_EQ(100, info.getBids()[0].price_);
-    EXPECT_EQ(5,   info.getBids()[0].quantity_);
+    EXPECT_EQ(5, info.getBids()[0].quantity_);
 }
 
 TEST(Guards, CancelNonExistentId_IsNoOp) {
@@ -115,7 +115,7 @@ TEST(PriceTimePriority, SamePriceFIFO_SellSide) {
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getAsks().size());
     EXPECT_EQ(100, info.getAsks()[0].price_);
-    EXPECT_EQ(3,   info.getAsks()[0].quantity_);
+    EXPECT_EQ(3, info.getAsks()[0].quantity_);
 }
 
 TEST(PriceTimePriority, SamePriceFIFO_BuySide) {
@@ -255,7 +255,7 @@ TEST(FillOrKill, BookUnchangedOnFailure) {
 
     ASSERT_EQ(before.getAsks().size(), after.getAsks().size());
     for (std::size_t i = 0; i < before.getAsks().size(); ++i) {
-        EXPECT_EQ(before.getAsks()[i].price_,    after.getAsks()[i].price_);
+        EXPECT_EQ(before.getAsks()[i].price_, after.getAsks()[i].price_);
         EXPECT_EQ(before.getAsks()[i].quantity_, after.getAsks()[i].quantity_);
     }
 }
@@ -288,7 +288,7 @@ TEST(FillOrKill, OneUnitShort_Fails) {
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getAsks().size());
     EXPECT_EQ(100, info.getAsks()[0].price_);
-    EXPECT_EQ(9,   info.getAsks()[0].quantity_);
+    EXPECT_EQ(9, info.getAsks()[0].quantity_);
 }
 
 TEST(FillOrKill, DoesNotRestInBook) {
@@ -359,7 +359,10 @@ TEST(ModifyOrder, PreservesOrderType) {
     EXPECT_EQ(1, ob.size());
 
     // Now prune – the modified order must still be removed as GoodForDay
-    class PruneHelper { public: static void prune(Orderbook &ob) { PruneTestHelper::pruneStaleGoodForNow(ob); } };
+    class PruneHelper {
+    public:
+        static void prune(Orderbook &ob) { PruneTestHelper::pruneStaleGoodForNow(ob); }
+    };
     PruneHelper::prune(ob);
 
     EXPECT_EQ(0, ob.size());
@@ -498,7 +501,7 @@ TEST(GoodForDay, PruneAllGFD_ClearsBook) {
     OrderFactory f;
     Orderbook ob{false};
 
-    ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Buy,  50, 10));
+    ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Buy, 50, 10));
     ob.addOrder(f.make(1, OrderType::GoodForDay, Side::Sell, 60, 5));
     EXPECT_EQ(2, ob.size());
 
@@ -516,7 +519,7 @@ TEST(GoodForDay, PruneDoesNotAffectMatchedGFD) {
     OrderFactory f;
     Orderbook ob{false};
 
-    ob.addOrder(f.make(0, OrderType::GoodForDay,   Side::Sell, 100, 10));
+    ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Sell, 100, 10));
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 100, 10));
 
     EXPECT_EQ(0, ob.size());  // both fully matched and removed
@@ -552,8 +555,8 @@ TEST(GoodTillCancel, MultiLevelSweep_CorrectResidualAfterEachLevel) {
     EXPECT_TRUE(info.getBids().empty());
     ASSERT_EQ(1, info.getAsks().size());
     EXPECT_EQ(102, info.getAsks()[0].price_);
-    EXPECT_EQ(5,   info.getAsks()[0].quantity_);
-    EXPECT_EQ(1,   ob.size());
+    EXPECT_EQ(5, info.getAsks()[0].quantity_);
+    EXPECT_EQ(1, ob.size());
 }
 
 TEST(GoodTillCancel, BidResidualRestsAfterPartialMatch) {
@@ -574,5 +577,5 @@ TEST(GoodTillCancel, BidResidualRestsAfterPartialMatch) {
     EXPECT_TRUE(info.getAsks().empty());
     ASSERT_EQ(1, info.getBids().size());
     EXPECT_EQ(100, info.getBids()[0].price_);
-    EXPECT_EQ(7,   info.getBids()[0].quantity_);  // 12 - 5
+    EXPECT_EQ(7, info.getBids()[0].quantity_);  // 12 - 5
 }

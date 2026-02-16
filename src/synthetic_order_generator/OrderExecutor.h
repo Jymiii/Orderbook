@@ -29,6 +29,7 @@ private:
     static std::vector<Order> getOrdersFromCsv(std::string path);
 
     void executeOrders(std::vector<Order> &orders);
+
     void executeOrdersPersist(std::vector<Order> &orders);
 
     void runFromSimulation();

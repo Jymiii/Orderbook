@@ -4,23 +4,20 @@
 
 #include "Orderbook.h"
 
-template <int N, Side S>
-void Orderbook::pruneStaleFillOrKill(LevelArray<N, S>& levelArray) {
+template<int N, Side S>
+void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levelArray) {
     if (levelArray.empty()) return;
 
     [[maybe_unused]] auto [bestPrice, orders] = levelArray.getBestOrders();
 
-    auto& order = orders.front();
+    auto &order = orders.front();
     switch (order.getType()) {
-        case OrderType::FillAndKill:
-            cancelOrderInternal(order.getId());
+        case OrderType::FillAndKill:cancelOrderInternal(order.getId());
             break;
 
-        case OrderType::FillOrKill:
-            throw std::logic_error("There was a stale FOK order, should never be possible.");
+        case OrderType::FillOrKill:throw std::logic_error("There was a stale FOK order, should never be possible.");
 
-        default:
-            break;
+        default:break;
     }
 }
 
@@ -144,11 +141,11 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     const Side side = listIt->getSide();
 
     if (side == Side::Buy) {
-        auto& orders = bids_.getOrders(price);
+        auto &orders = bids_.getOrders(price);
         orders.erase(listIt);
         bids_.onOrderRemoved(price);
     } else {
-        auto& orders = asks_.getOrders(price);
+        auto &orders = asks_.getOrders(price);
         orders.erase(listIt);
         asks_.onOrderRemoved(price);
     }
@@ -287,19 +284,19 @@ Trades Orderbook::matchOrders() {
 
     LevelInfos levelInfosBids, levelInfosAsks;
 
-    auto createLevelInfo = [](Price price, const Orders& orders) {
+    auto createLevelInfo = [](Price price, const Orders &orders) {
         const Quantity total = std::accumulate(
                 orders.begin(), orders.end(), Quantity{0},
-                [](Quantity q, const Order& o) { return q + o.getRemainingQuantity(); }
+                [](Quantity q, const Order &o) { return q + o.getRemainingQuantity(); }
         );
         return LevelInfo{price, total};
     };
 
-    bids_.forEachLevelBestToWorst([&](Price price, const Orders& orders) {
+    bids_.forEachLevelBestToWorst([&](Price price, const Orders &orders) {
         levelInfosBids.push_back(createLevelInfo(price, orders));
     });
 
-    asks_.forEachLevelBestToWorst([&](Price price, const Orders& orders) {
+    asks_.forEachLevelBestToWorst([&](Price price, const Orders &orders) {
         levelInfosAsks.push_back(createLevelInfo(price, orders));
     });
 

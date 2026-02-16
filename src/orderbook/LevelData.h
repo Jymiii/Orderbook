@@ -4,7 +4,9 @@
 
 #ifndef ORDERBOOK_LEVELDATA_H
 #define ORDERBOOK_LEVELDATA_H
+
 #include "Usings.h"
+
 struct LevelData {
     Quantity quantity_{};
     Quantity count_{};

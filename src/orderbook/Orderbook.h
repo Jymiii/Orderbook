@@ -48,7 +48,7 @@ private:
 
     void cancelOrders(const OrderIds &orderIds);
 
-    template <int N, Side S>
+    template<int N, Side S>
     void pruneStaleFillOrKill(LevelArray<N, S> &levels);
 
     void cancelOrderInternal(OrderId orderId);

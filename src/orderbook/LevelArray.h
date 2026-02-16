@@ -16,16 +16,22 @@ struct BestScanPolicy;
 template<>
 struct BestScanPolicy<Side::Sell> {
     static constexpr int start(int /*N*/) { return 0; }
+
     static constexpr int end(int N) { return N; }
+
     static constexpr int step = +1;
+
     static constexpr bool better(int a, int b) { return a <= b; }
 };
 
 template<>
 struct BestScanPolicy<Side::Buy> {
     static constexpr int start(int N) { return N - 1; }
+
     static constexpr int end(int /*N*/) { return -1; }
+
     static constexpr int step = -1;
+
     static constexpr bool better(int a, int b) { return a >= b; }
 };
 
@@ -35,43 +41,45 @@ class LevelArray {
 
 public:
     LevelArray() = default;
-    LevelArray(const LevelArray&) = delete;
-    LevelArray& operator=(const LevelArray&) = delete;
 
-    Orders& getOrders(Price price) {
+    LevelArray(const LevelArray &) = delete;
+
+    LevelArray &operator=(const LevelArray &) = delete;
+
+    Orders &getOrders(Price price) {
         const int idx = priceToIndex(price);
         if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
         return levels_[idx];
     }
 
-    const Orders& getOrders(Price price) const {
+    const Orders &getOrders(Price price) const {
         const int idx = priceToIndex(price);
         if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
         return levels_[idx];
     }
 
-    std::pair<Price, Orders&> getBestOrders() {
+    std::pair<Price, Orders &> getBestOrders() {
         if (empty_) throw std::logic_error("side empty");
         assert(bestIdx_ >= 0 && bestIdx_ < N);
-        return { indexToPrice(bestIdx_), levels_[bestIdx_] };
+        return {indexToPrice(bestIdx_), levels_[bestIdx_]};
     }
 
-    std::pair<Price, const Orders&> getBestOrders() const {
+    std::pair<Price, const Orders &> getBestOrders() const {
         if (empty_) throw std::logic_error("side empty");
         assert(bestIdx_ >= 0 && bestIdx_ < N);
-        return { indexToPrice(bestIdx_), levels_[bestIdx_] };
+        return {indexToPrice(bestIdx_), levels_[bestIdx_]};
     }
 
-    std::pair<Price, Orders&> getWorstOrders() {
+    std::pair<Price, Orders &> getWorstOrders() {
         if (empty_) throw std::logic_error("side empty");
         assert(worstIdx_ >= 0 && worstIdx_ < N);
-        return { indexToPrice(worstIdx_), levels_[worstIdx_] };
+        return {indexToPrice(worstIdx_), levels_[worstIdx_]};
     }
 
-    std::pair<Price, const Orders&> getWorstOrders() const {
+    std::pair<Price, const Orders &> getWorstOrders() const {
         if (empty_) throw std::logic_error("side empty");
         assert(worstIdx_ >= 0 && worstIdx_ < N);
-        return { indexToPrice(worstIdx_), levels_[worstIdx_] };
+        return {indexToPrice(worstIdx_), levels_[worstIdx_]};
     }
 
     [[nodiscard]] Price getBestPrice() const noexcept {
@@ -107,19 +115,18 @@ public:
         const int idx = priceToIndex(price);
         if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
 
-        const bool removedBest  = (idx == bestIdx_);
+        const bool removedBest = (idx == bestIdx_);
         const bool removedWorst = (idx == worstIdx_);
 
         if (!removedBest && !removedWorst) return;
 
-        if (removedBest)  updateBestIdx();
+        if (removedBest) updateBestIdx();
         if (removedWorst) updateWorstIdx();
     }
 
-    bool canFullyFill(const std::unordered_map<Price, LevelData>& levelDatas,
+    bool canFullyFill(const std::unordered_map<Price, LevelData> &levelDatas,
                       Price limitPrice,
-                      Quantity quantity) const
-    {
+                      Quantity quantity) const {
         if (empty_) return false;
 
         const int limitIdx = priceToIndex(limitPrice);
@@ -143,8 +150,8 @@ public:
         return false;
     }
 
-    template <class F>
-    void forEachLevelBestToWorst(F&& f) const {
+    template<class F>
+    void forEachLevelBestToWorst(F &&f) const {
         if (empty_) return;
 
         for (int i = bestIdx_;; i += P::step) {
@@ -197,8 +204,8 @@ private:
 private:
     std::array<Orders, N> levels_{};
 
-    int  bestIdx_{P::start(N)};
-    int  worstIdx_{P::start(N)};
+    int bestIdx_{P::start(N)};
+    int worstIdx_{P::start(N)};
     bool empty_{true};
 
     Price lowerBound_{0};
