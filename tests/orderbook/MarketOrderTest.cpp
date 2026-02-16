@@ -57,10 +57,10 @@ TEST(MarketOrder, SweepBuys) {
 
     Trades trades = ob.addOrder(f.make(3, Side::Sell, 80));
     auto info = ob.getOrderInfos();
-    EXPECT_EQ(1, ob.size());
+    EXPECT_EQ(0, ob.size());
     EXPECT_EQ(3, trades.size());
     EXPECT_EQ(info.getBids().size(), 0);
-    EXPECT_EQ(info.getAsks().size(), 1);
+    EXPECT_EQ(info.getAsks().size(), 0);
 }
 
 TEST(MarketOrder, SweepBuysButHasQuantityLimit) {

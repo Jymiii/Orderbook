@@ -10,6 +10,7 @@
 #include "Trade.h"
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
+#include "LevelArray.h"
 #include <numeric>
 #include <map>
 #include <iostream>
@@ -21,20 +22,9 @@
 
 class Orderbook {
 private:
-    struct LevelData {
-        Quantity quantity_{};
-        Quantity count_{};
-
-        enum class Action {
-            Add,
-            Remove,
-            Match
-        };
-    };
-
     std::unordered_map<Price, LevelData> levelData_;
-    std::vector<Level> bids_;
-    std::vector<Level> asks_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
 
     mutable std::mutex orderMutex_{};
@@ -58,7 +48,8 @@ private:
 
     void cancelOrders(const OrderIds &orderIds);
 
-    void pruneStaleFillOrKill(std::vector<Level> &levels);
+    template <int N, Side S>
+    void pruneStaleFillOrKill(LevelArray<N, S> &levels);
 
     void cancelOrderInternal(OrderId orderId);
 
@@ -69,44 +60,6 @@ private:
     void pruneStaleGoodForNow();
 
     Trades addOrderInternal(Order order);
-
-    template <class T, class Compare>
-    Level& insertOrGet(Price price, T& levels, Compare comp) {
-        auto it = std::lower_bound(levels.begin(), levels.end(), price, [comp](const auto& p, Price price) {
-            return comp(p.price_, price);
-        });
-
-        if (it == levels.end() || it->price_ != price){
-            it = levels.insert(it, Level{price, {}});
-        }
-        return *it;
-    }
-
-    template <class T, class Compare>
-    typename T::iterator get(Price price, T& levels, Compare comp) {
-        auto it = std::lower_bound(levels.begin(), levels.end(), price, [comp](const auto& p, Price price) {
-            return comp(p.price_, price);
-        });
-
-        assert(it != levels.end() && it->price_ == price);
-        return it;
-    }
-
-    template<class T, class Compare>
-    bool canFullyFill(T& levels, Price price, Quantity quantity, Compare comp) {
-        if (levels.empty()) return false;
-        auto it = levels.rbegin();
-        while (it != levels.rend()) {
-            const auto &[bestPrice, orders] = *it;
-            auto levelQuantity = levelData_.at(bestPrice).quantity_;
-            if (comp(bestPrice, price)) {
-                if (quantity <= levelQuantity) return true;
-                quantity -= levelQuantity;
-            } else { break; }
-            it = std::next(it);
-        }
-        return false;
-    }
 
 public:
     explicit Orderbook(bool startPruneThread = true);

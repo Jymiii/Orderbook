@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(googletest)
 # ---- Library: code under test ----
 add_library(orderbook_lib
         src/orderbook/Orderbook.cpp
+        src/orderbook/LevelData.h
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

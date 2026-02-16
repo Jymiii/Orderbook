@@ -192,12 +192,10 @@ TEST(MarketOrder, SweepsEntireBook) {
     EXPECT_TRUE(hasTradeLike(trades, {3, 2, 102, 102, 10}));
 
     // Asks all gone; residual buy rests
-    EXPECT_EQ(1, ob.size());
+    EXPECT_EQ(0, ob.size());
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getAsks().empty());
-    ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(102, info.getBids()[0].price_);
-    EXPECT_EQ(70,  info.getBids()[0].quantity_);  // 100 - 30
+    ASSERT_EQ(0, info.getBids().size());
 }
 
 TEST(MarketOrder, TradePrice_IsRestingOrderPrice_NotMarketPrice) {
@@ -227,12 +225,10 @@ TEST(MarketOrder, AddMarketOrder_WhenCounterBookBecomesEmpty_ResidualsRest) {
     ASSERT_EQ(1, trades.size());
     EXPECT_TRUE(hasTradeLike(trades, {1, 0, 50, 50, 5}));
 
-    EXPECT_EQ(1, ob.size());
+    EXPECT_EQ(0, ob.size());
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getAsks().empty());
-    ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(50, info.getBids()[0].price_);
-    EXPECT_EQ(5,  info.getBids()[0].quantity_);  // 10 - 5
+    EXPECT_TRUE(info.getBids().empty());
 }
 
 // ============================================================
