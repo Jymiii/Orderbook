@@ -36,7 +36,7 @@ void OrderGenerator::generateOrders(double mid, int count, std::vector<Order> &o
 
         const double raw = Constants::TICK_MULTIPLIER * mid * spread;
         const int32_t px = std::max<int32_t>(1, static_cast<int32_t>(std::llround(raw)));
-        orders.emplace_back(id++, OrderType::GoodTillCancel, side, px, 5);
+        orders.emplace_back(id++, OrderType::GoodTillCancel, side, px, std::abs(getRandom()) * 100 + 1);
     }
 }
 
