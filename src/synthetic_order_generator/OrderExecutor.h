@@ -20,7 +20,7 @@ public:
     Orderbook &getOrderbook();
 
 private:
-    Orderbook orderbook_{false};
+    Orderbook orderbook_{true};
     OrderGenerator generator_{MarketState{}, 100000};
     std::string persist_path_{};
 

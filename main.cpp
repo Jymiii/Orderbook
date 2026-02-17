@@ -8,5 +8,5 @@ int main() {
         double time = ex.run("orders.txt");
         tot += time;
     }
-    std::cout << "Average: " << tot / count << " nano seconds per order.";
+    std::cout << "Average: " << tot / count << " to process all orders " << count << " times.";
 }
