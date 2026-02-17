@@ -15,7 +15,7 @@ struct BestScanPolicy;
 
 template<>
 struct BestScanPolicy<Side::Sell> {
-    static constexpr int start(int /*N*/) { return 0; }
+    static constexpr int start(int) { return 0; }
 
     static constexpr int end(int N) { return N; }
 
@@ -28,7 +28,7 @@ template<>
 struct BestScanPolicy<Side::Buy> {
     static constexpr int start(int N) { return N - 1; }
 
-    static constexpr int end(int /*N*/) { return -1; }
+    static constexpr int end(int) { return -1; }
 
     static constexpr int step = -1;
 
