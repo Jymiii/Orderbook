@@ -184,9 +184,13 @@ tests/
 
 ## Notes
 
-- The orderbook is instantiated with `startPruneThread = false` inside `OrderExecutor` to avoid running the GFD background thread during benchmarking and testing.
+- The orderbook is instantiated with `startPruneThread = true` inside `OrderExecutor`. Turn off to avoid running the GFD background thread during benchmarking and testing.
 - The global `id` counter in `OrderGenerator.cpp` is not thread-safe; order generation is assumed to be single-threaded.
 - `FillOrKill` orders that somehow survive matching are treated as a logic error and will throw `std::logic_error`.
+
+## In Progress
+- Simulating cancels and modify
+- Resizing LevelsArray
 
 
 Credits / Inspiration:
