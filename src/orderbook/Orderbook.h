@@ -26,6 +26,7 @@ private:
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
+    Trades trades;
 
     mutable std::mutex orderMutex_{};
     std::thread gfdPruneThread_;
@@ -44,7 +45,7 @@ private:
 
     bool canMatch(Side side, Price price);
 
-    Trades matchOrders();
+    void matchOrders();
 
     void cancelOrders(const OrderIds &orderIds);
 
@@ -59,16 +60,16 @@ private:
 
     void pruneStaleGoodForNow();
 
-    Trades addOrderInternal(Order order);
+    void addOrderInternal(Order order);
 
 public:
     explicit Orderbook(bool startPruneThread = true);
 
     ~Orderbook();
 
-    Trades addOrder(Order order);
+    void addOrder(Order order);
 
-    Trades modifyOrder(OrderModify orderModify);
+    void modifyOrder(OrderModify orderModify);
 
     void cancelOrder(OrderId orderId);
 
@@ -80,6 +81,14 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, Orderbook &ob) {
         return os << ob.getOrderInfos();
+    }
+
+    const Trades &getTrades() const {
+        return trades;
+    }
+
+    void clearTrades() {
+        trades.clear();
     }
 };
 

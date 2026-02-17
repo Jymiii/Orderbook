@@ -92,24 +92,24 @@ TEST(GoodTillCancel, Matching_ProducesTradesAndUpdatesBook) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 50, 1));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Sell, 60, 10));
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Buy, 45, 10));
-    EXPECT_EQ(trades.size(), 0);
+    ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Buy, 45, 10));
+    EXPECT_EQ(ob.getTrades().size(), 0);
 
     auto info = ob.getOrderInfos();
     EXPECT_EQ(ob.size(), 4);
     EXPECT_EQ(info.getAsks().size(), 2);
     EXPECT_EQ(info.getBids().size(), 1);
 
-    trades = ob.addOrder(f.make(4, OrderType::GoodTillCancel, Side::Buy, 50, 2));
-    ASSERT_EQ(trades.size(), 2);
-    EXPECT_TRUE(hasTradeLike(trades, Trade{4, 0, 50, 50, 1}));
-    EXPECT_TRUE(hasTradeLike(trades, Trade{4, 1, 50, 50, 1}));
+    ob.addOrder(f.make(4, OrderType::GoodTillCancel, Side::Buy, 50, 2));
+    ASSERT_EQ(ob.getTrades().size(), 2);
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{4, 0, 50, 50, 1}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{4, 1, 50, 50, 1}));
 
-    EXPECT_EQ(trades[0].getBidId(), 4);
-    EXPECT_EQ(trades[1].getBidId(), 4);
+    EXPECT_EQ(ob.getTrades()[0].getBidId(), 4);
+    EXPECT_EQ(ob.getTrades()[1].getBidId(), 4);
 
-    EXPECT_EQ(trades[0].getAskId(), 0);
-    EXPECT_EQ(trades[1].getAskId(), 1);
+    EXPECT_EQ(ob.getTrades()[0].getAskId(), 0);
+    EXPECT_EQ(ob.getTrades()[1].getAskId(), 1);
 
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getAsks().size(), 1);
@@ -118,20 +118,24 @@ TEST(GoodTillCancel, Matching_ProducesTradesAndUpdatesBook) {
     EXPECT_EQ(info.getBids().size(), 1);
     EXPECT_EQ(ob.size(), 2);
 
-    trades = ob.addOrder(f.make(5, OrderType::GoodTillCancel, Side::Buy, 61, 15));
-    ASSERT_EQ(trades.size(), 1);
-    EXPECT_EQ(trades[0].getBidId(), 5);
-    EXPECT_EQ(trades[0].getAskId(), 2);
-    EXPECT_TRUE(hasTradeLike(trades, Trade{5, 2, 61, 60, 10}));
+    ob.clearTrades();
+
+    ob.addOrder(f.make(5, OrderType::GoodTillCancel, Side::Buy, 61, 15));
+    ASSERT_EQ(ob.getTrades().size(), 1);
+    EXPECT_EQ(ob.getTrades()[0].getBidId(), 5);
+    EXPECT_EQ(ob.getTrades()[0].getAskId(), 2);
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{5, 2, 61, 60, 10}));
 
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getAsks().size(), 0);
     EXPECT_EQ(info.getBids().size(), 2);
     EXPECT_EQ(ob.size(), 2);
 
-    trades = ob.addOrder(f.make(6, OrderType::GoodTillCancel, Side::Sell, 61, 5));
-    ASSERT_EQ(trades.size(), 1);
-    EXPECT_TRUE(hasTradeLike(trades, Trade{5, 6, 61, 61, 5}));
+    ob.clearTrades();
+
+    ob.addOrder(f.make(6, OrderType::GoodTillCancel, Side::Sell, 61, 5));
+    ASSERT_EQ(ob.getTrades().size(), 1);
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{5, 6, 61, 61, 5}));
 
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getAsks().size(), 0);
@@ -177,14 +181,14 @@ TEST(GoodTillCancel, CancelingStopsPotentialTrades) {
     ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 20));
     ob.cancelOrder(3);
 
-    Trades trades = ob.addOrder(f.make(4, OrderType::GoodTillCancel, Side::Buy, 102, 60));
+    ob.addOrder(f.make(4, OrderType::GoodTillCancel, Side::Buy, 102, 60));
     OrderbookLevelInfos infos = ob.getOrderInfos();
     EXPECT_EQ(1, ob.size());
-    EXPECT_EQ(3, trades.size());
-    EXPECT_FALSE(hasTradeLike(trades, Trade{4, 3, 102, 102, 20}));
-    EXPECT_TRUE(hasTradeLike(trades, Trade{4, 2, 102, 102, 30}));
-    EXPECT_TRUE(hasTradeLike(trades, Trade{4, 1, 102, 101, 15}));
-    EXPECT_TRUE(hasTradeLike(trades, Trade{4, 0, 102, 100, 10}));
+    EXPECT_EQ(3, ob.getTrades().size());
+    EXPECT_FALSE(hasTradeLike(ob.getTrades(), Trade{4, 3, 102, 102, 20}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{4, 2, 102, 102, 30}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{4, 1, 102, 101, 15}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), Trade{4, 0, 102, 100, 10}));
     EXPECT_TRUE(infos.getAsks().empty());
     EXPECT_EQ(1, infos.getBids().size());
 
@@ -208,8 +212,8 @@ TEST(GoodTillCancel, ModifyOrder_UpdatesPriceAndQuantity) {
     EXPECT_EQ(info.getBids()[0].price_, 100);
     EXPECT_EQ(info.getBids()[0].quantity_, 10);
 
-    Trades trades = ob.modifyOrder(OrderModify{0, Side::Buy, 105, 7});
-    EXPECT_TRUE(trades.empty());
+    ob.modifyOrder(OrderModify{0, Side::Buy, 105, 7});
+    EXPECT_TRUE(ob.getTrades().empty());
 
     info = ob.getOrderInfos();
     EXPECT_EQ(ob.size(), 1);
@@ -232,8 +236,8 @@ TEST(GoodTillCancel, ModifyOrder_UnknownId_DoesNothing) {
     ASSERT_EQ(before.getBids().size(), 1);
     ASSERT_EQ(before.getAsks().size(), 1);
 
-    Trades trades = ob.modifyOrder(OrderModify{999, Side::Buy, 105, 7});
-    EXPECT_TRUE(trades.empty());
+    ob.modifyOrder(OrderModify{999, Side::Buy, 105, 7});
+    EXPECT_TRUE(ob.getTrades().empty());
 
     auto after = ob.getOrderInfos();
     EXPECT_EQ(ob.size(), 2);
@@ -254,15 +258,17 @@ TEST(GoodTillCancel, ModifyOrder_AllowsNewTradesToHappen) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 101, 10));
 
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Buy, 102, 10));
-    Trades trades = ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 30));
-    EXPECT_EQ(1, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {2, 3, 102, 102, 10}));
+    ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 30));
+    EXPECT_EQ(1, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {2, 3, 102, 102, 10}));
     EXPECT_EQ(3, ob.size());
 
-    trades = ob.modifyOrder({3, Side::Sell, 100, 20});
-    EXPECT_EQ(2, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {0, 3, 100, 100, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {1, 3, 101, 100, 10}));
+    ob.clearTrades();
+
+    ob.modifyOrder({3, Side::Sell, 100, 20});
+    EXPECT_EQ(2, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 3, 100, 100, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 3, 101, 100, 10}));
 
     OrderbookLevelInfos info = ob.getOrderInfos();
     EXPECT_EQ(ob.size(), 0);

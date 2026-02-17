@@ -101,9 +101,9 @@ Orderbook::~Orderbook() {
     return orders_.size();
 }
 
-Trades Orderbook::addOrder(Order order) {
+void Orderbook::addOrder(Order order) {
     std::scoped_lock _{orderMutex_};
-    return addOrderInternal(std::move(order));
+    addOrderInternal(order);
 }
 
 void Orderbook::cancelOrder(OrderId orderId) {
@@ -111,13 +111,13 @@ void Orderbook::cancelOrder(OrderId orderId) {
     cancelOrderInternal(orderId);
 }
 
-Trades Orderbook::modifyOrder(OrderModify orderModify) {
+void Orderbook::modifyOrder(OrderModify orderModify) {
     std::scoped_lock _{orderMutex_};
-    if (!orders_.contains(orderModify.getId())) return {};
+    if (!orders_.contains(orderModify.getId())) return;
     auto &ordersIterator = orders_.at(orderModify.getId());
     OrderType type{ordersIterator->getType()};
     cancelOrderInternal(orderModify.getId());
-    return addOrderInternal(orderModify.toOrder(type));
+    addOrderInternal(orderModify.toOrder(type));
 }
 // ===== Internal cancel / add helpers =====
 
@@ -152,9 +152,9 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     orders_.erase(it);
 }
 
-Trades Orderbook::addOrderInternal(Order order) {
+void Orderbook::addOrderInternal(Order order) {
     if (order.getRemainingQuantity() == 0 || orders_.contains(order.getId())) {
-        return {};
+        return;
     }
 
     const Side side = order.getSide();
@@ -166,25 +166,25 @@ Trades Orderbook::addOrderInternal(Order order) {
         } else if (side == Side::Buy && !asks_.empty()) {
             const Price worstAskPrice = asks_.getWorstPrice();
             order.toFillAndKill(worstAskPrice);
-        } else return {};
+        } else return;
     }
 
     const Price price = order.getPrice();
 
     if (order.getType() == OrderType::FillAndKill && !canMatch(side, price)) {
-        return {};
+        return;
     }
 
     if (order.getType() == OrderType::FillOrKill) {
         if (!canFullyFill(side, price, order.getRemainingQuantity())) {
-            return {};
+            return;
         }
     }
 
     Orders &orders =
             (side == Side::Buy) ? bids_.getOrders(price) : asks_.getOrders(price);
 
-    orders.push_back(std::move(order));
+    orders.push_back(order);
     auto iterator = std::prev(orders.end());
 
     orders_.emplace(iterator->getId(), iterator);
@@ -194,7 +194,7 @@ Trades Orderbook::addOrderInternal(Order order) {
     if (side == Side::Buy) bids_.onOrderAdded(price);
     else asks_.onOrderAdded(price);
 
-    return matchOrders();
+    matchOrders();
 }
 
 // ===== Matching / eligibility =====
@@ -222,10 +222,8 @@ bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) {
 }
 
 
-Trades Orderbook::matchOrders() {
-    if (bids_.empty() || asks_.empty()) return {};
-
-    Trades trades;
+void Orderbook::matchOrders() {
+    if (bids_.empty() || asks_.empty()) return;
 
     while (true) {
         if (bids_.empty() || asks_.empty()) {
@@ -273,7 +271,6 @@ Trades Orderbook::matchOrders() {
     }
     pruneStaleFillOrKill(bids_);
     pruneStaleFillOrKill(asks_);
-    return trades;
 }
 
 // ===== Read-only views =====

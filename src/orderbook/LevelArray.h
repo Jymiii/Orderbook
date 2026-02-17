@@ -52,7 +52,7 @@ public:
         return levels_[idx];
     }
 
-    const Orders &getOrders(Price price) const {
+    [[nodiscard]] const Orders &getOrders(Price price) const {
         const int idx = priceToIndex(price);
         if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
         return levels_[idx];
@@ -64,7 +64,7 @@ public:
         return {indexToPrice(bestIdx_), levels_[bestIdx_]};
     }
 
-    std::pair<Price, const Orders &> getBestOrders() const {
+    [[nodiscard]] std::pair<Price, const Orders &> getBestOrders() const {
         if (empty_) throw std::logic_error("side empty");
         assert(bestIdx_ >= 0 && bestIdx_ < N);
         return {indexToPrice(bestIdx_), levels_[bestIdx_]};
@@ -76,7 +76,7 @@ public:
         return {indexToPrice(worstIdx_), levels_[worstIdx_]};
     }
 
-    std::pair<Price, const Orders &> getWorstOrders() const {
+    [[nodiscard]] std::pair<Price, const Orders &> getWorstOrders() const {
         if (empty_) throw std::logic_error("side empty");
         assert(worstIdx_ >= 0 && worstIdx_ < N);
         return {indexToPrice(worstIdx_), levels_[worstIdx_]};
@@ -122,9 +122,9 @@ public:
         if (removedWorst) updateWorstIdx();
     }
 
-    bool canFullyFill(const std::unordered_map<Price, LevelData> &levelDatas,
-                      Price limitPrice,
-                      Quantity quantity) const {
+    [[nodiscard]] bool canFullyFill(const std::unordered_map<Price, LevelData> &levelDatas,
+                                    Price limitPrice,
+                                    Quantity quantity) const {
         if (empty_) return false;
 
         const int limitIdx = priceToIndex(limitPrice);
