@@ -118,8 +118,6 @@ public:
         const bool removedBest = (idx == bestIdx_);
         const bool removedWorst = (idx == worstIdx_);
 
-        if (!removedBest && !removedWorst) return;
-
         if (removedBest) updateBestIdx();
         if (removedWorst) updateWorstIdx();
     }
