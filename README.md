@@ -143,18 +143,33 @@ const Trades& trades = ob.getTrades();
 ## Project Structure
 
 ```
-├── orderbook/
-│   ├── Orderbook.h / Orderbook.cpp   # Core matching engine
+src/
+├── orderbook/                        # Core matching engine
+│   ├── Constants.h                   # Market constants (close time, tick multiplier, etc.)
 │   ├── LevelArray.h                  # Templated price level storage
 │   ├── LevelData.h                   # Per-level quantity/count index
-│   ├── MarketState.h                 # GBM simulation parameters
-│   ├── Order.h                       # Order type and state
+│   ├── LevelInfo.h                   # Read-only level snapshot struct
+│   ├── Order.h                       # Order state and lifecycle
+│   ├── Orderbook.h / Orderbook.cpp   # Matching engine
+│   ├── OrderbookLevelInfos.h         # Bid/ask snapshot returned by getOrderInfos()
 │   ├── OrderModify.h                 # Modify request wrapper
+│   ├── OrderType.h                   # OrderType enum
+│   ├── Side.h                        # Side enum (Buy / Sell)
 │   ├── Trade.h                       # Executed trade record
-│   └── OrderbookLevelInfos.h         # Read-only orderbook snapshot
-├── OrderGenerator.h / OrderGenerator.cpp   # GBM-based order simulator
-├── OrderExecutor.h  / OrderExecutor.cpp    # Simulation and CSV runner
-└── Timer.h                                 # High-resolution elapsed timer
+│   └── Usings.h                      # Type aliases (Price, Quantity, OrderId, …)
+│
+└── synthetic_order_generator/        # Simulation and execution layer
+    ├── MarketState.h                  # GBM parameters (mid, drift, sigma, dt, b)
+    ├── OrderEvent.h                   # Order event types
+    ├── OrderExecutor.h / OrderExecutor.cpp   # Simulation and CSV runner
+    ├── OrderGenerator.h / OrderGenerator.cpp # GBM-based order simulator
+    ├── OrderRegistry.h                # Tracks generated order IDs
+    └── Timer.h                        # High-resolution elapsed timer
+
+tests/
+└── orderbook/
+    ├── AdditionalTests.cpp            # Extended orderbook unit tests
+    └── FillAndKillTest.cpp            # FAK / FOK specific tests                           
 ```
 
 ---
