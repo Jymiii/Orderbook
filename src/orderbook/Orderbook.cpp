@@ -262,8 +262,7 @@ Trades Orderbook::matchOrders() {
             if (bidFilled) {
                 orders_.erase(bidOrder.getId());
                 bidOrders.pop_front();
-                bids_.onOrderRemoved(bidOrderPrice);
-                if (bidOrders.empty()) asks_.onOrderRemoved(askOrderPrice);
+                if (bidOrders.empty()) bids_.onOrderRemoved(bidOrderPrice);
             }
             if (askFilled) {
                 orders_.erase(askOrder.getId());
