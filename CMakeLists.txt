@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(googletest)
 # ---- Library: code under test ----
 add_library(orderbook_lib
         src/orderbook/Orderbook.cpp
+        src/orderbook/LevelData.h
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -41,6 +42,7 @@ add_executable(OrderbookTests
         tests/orderbook/FillOrKillTest.cpp
         tests/orderbook/FillAndKillTest.cpp
         tests/orderbook/GoodForDayTest.cpp
+        tests/orderbook/AdditionalTests.cpp
 )
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
 

@@ -7,13 +7,13 @@
 #include <iostream>
 
 OrderExecutor::OrderExecutor(MarketState state, size_t ticks, std::string persist_path)
-        : generator_{state, ticks}, persist_path_{ persist_path } {}
+        : generator_{state, ticks}, persist_path_{persist_path} {}
 
-void OrderExecutor::run(std::string csv_path) {
+double OrderExecutor::run(std::string csv_path) {
     if (csv_path.empty()) {
-        runFromSimulation();
+        return runFromSimulation();
     } else {
-        runFromCsv(csv_path);
+        return runFromCsv(csv_path);
     }
 }
 
@@ -21,35 +21,35 @@ Orderbook &OrderExecutor::getOrderbook() {
     return orderbook_;
 }
 
-void OrderExecutor::executeOrders(std::vector<Order> &orders) {
+double OrderExecutor::executeOrders(std::vector<Order> &orders) {
     Timer timer;
     for (const auto &order: orders) {
         orderbook_.addOrder(order);
     }
     auto duration = timer.elapsed();
-    std::cout << "Processing " << orders.size() << " orders took " << duration << " seconds.";
+    return duration;
 }
 
-void OrderExecutor::executeOrdersPersist(std::vector<Order> &orders) {
+double OrderExecutor::executeOrdersPersist(std::vector<Order> &orders) {
     Timer timer;
-    std::ofstream file { persist_path_ };
+    std::ofstream file{persist_path_};
     for (const auto &order: orders) {
         orderbook_.addOrder(order);
         file << order;
     }
     auto duration = timer.elapsed();
-    std::cout << "Processing " << orders.size() << " orders took " << duration << " seconds.";
+    return duration;
 }
 
-void OrderExecutor::runFromSimulation() {
+double OrderExecutor::runFromSimulation() {
     std::vector<Order> orders = generator_.generate();
-    if (persist_path_.empty()) executeOrders(orders);
-    else executeOrdersPersist(orders);
+    if (persist_path_.empty()) return executeOrders(orders);
+    else return executeOrdersPersist(orders);
 }
 
-void OrderExecutor::runFromCsv(std::string csv_path) {
+double OrderExecutor::runFromCsv(std::string csv_path) {
     std::vector<Order> orders = getOrdersFromCsv(csv_path);
-    executeOrders(orders);
+    return executeOrders(orders);
 }
 
 std::vector<Order> OrderExecutor::getOrdersFromCsv(std::string path) {

@@ -54,6 +54,11 @@ public:
         price_ = price;
     }
 
+    void toFillAndKill(Price price) {
+        type_ = OrderType::FillAndKill;
+        price_ = price;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Order &order) {
         return os << order.id_ << "," << std::to_underlying(order.type_) << "," << std::to_underlying(order.side_)
                   << "," << order.price_ << "," << order.remainingQuantity_ << "\n";
@@ -68,5 +73,5 @@ private:
 };
 
 using Orders = std::list<Order>;
-using OrdersIterator = Orders::iterator;
+using OrdersIterator = std::list<Order>::iterator;
 #endif //ORDERBOOK_ORDER_H

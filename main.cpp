@@ -1,8 +1,12 @@
-#include "synthetic_order_generator/OrderGenerator.h"
 #include "synthetic_order_generator/OrderExecutor.h"
 
 int main() {
-    OrderExecutor executor{MarketState{}, 100000};
-    executor.run("../data/orders.txt");
-    return 0;
+    double tot = 0;
+    int count = 50;
+    for (int i = 0; i < count; i++) {
+        OrderExecutor ex{MarketState{}, 100000};
+        double time = ex.run("orders.txt");
+        tot += time;
+    }
+    std::cout << "Average: " << tot / count << " nano seconds per order.";
 }

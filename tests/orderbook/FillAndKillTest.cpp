@@ -7,15 +7,15 @@ TEST(FillAndKill, NoCounterParty) {
     OrderFactory f;
     Orderbook ob{};
 
-    Trades trades_one = ob.addOrder(f.make(OrderType::FillAndKill, Side::Buy, 50, 1));
-    Trades trades_two = ob.addOrder(f.make(OrderType::FillAndKill, Side::Sell, 50, 1));
+    ob.addOrder(f.make(OrderType::FillAndKill, Side::Buy, 50, 1));
+    ob.addOrder(f.make(OrderType::FillAndKill, Side::Sell, 50, 1));
 
     EXPECT_EQ(ob.size(), 0);
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getBids().empty());
     EXPECT_TRUE(info.getAsks().empty());
-    EXPECT_TRUE(trades_one.empty());
-    EXPECT_TRUE(trades_two.empty());
+    EXPECT_TRUE(ob.getTrades().empty());
+    EXPECT_TRUE(ob.getTrades().empty());
 }
 
 TEST(FillAndKill, PartialFill_Simple) {
@@ -24,15 +24,15 @@ TEST(FillAndKill, PartialFill_Simple) {
 
     ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Buy, 50, 10));
 
-    Trades trades = ob.addOrder(f.make(1, OrderType::FillAndKill, Side::Sell, 50, 15));
+    ob.addOrder(f.make(1, OrderType::FillAndKill, Side::Sell, 50, 15));
 
     EXPECT_EQ(0, ob.size());  // Buy fully matched, remaining sell qty canceled
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getBids().empty());
     EXPECT_TRUE(info.getAsks().empty());
 
-    EXPECT_EQ(1, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {0, 1, 50, 50, 10}));
+    EXPECT_EQ(1, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 1, 50, 50, 10}));
 }
 
 TEST(FillAndKill, PartialFill_Big) {
@@ -43,17 +43,17 @@ TEST(FillAndKill, PartialFill_Big) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 52, 15));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Sell, 55, 10));
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 55, 40));
+    ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 55, 40));
 
     EXPECT_EQ(0, ob.size());  // all sells consumed, remainder canceled
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getBids().empty());
     EXPECT_TRUE(info.getAsks().empty());
 
-    EXPECT_EQ(3, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {3, 0, 55, 50, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {3, 1, 55, 52, 15}));
-    EXPECT_TRUE(hasTradeLike(trades, {3, 2, 55, 55, 10}));
+    EXPECT_EQ(3, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 55, 50, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 1, 55, 52, 15}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 2, 55, 55, 10}));
 }
 
 TEST(FillAndKill, LeavesBookIfNotFullyMatchedOtherSide) {
@@ -64,7 +64,7 @@ TEST(FillAndKill, LeavesBookIfNotFullyMatchedOtherSide) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 52, 15));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Sell, 55, 10));
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 52, 20));
+    ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 52, 20));
 
     EXPECT_EQ(2, ob.size());
     auto info = ob.getOrderInfos();
@@ -78,9 +78,9 @@ TEST(FillAndKill, LeavesBookIfNotFullyMatchedOtherSide) {
     EXPECT_EQ(55, info.getAsks()[1].price_);
     EXPECT_EQ(10, info.getAsks()[1].quantity_);
 
-    ASSERT_EQ(2, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {3, 0, 52, 50, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {3, 1, 52, 52, 10}));
+    ASSERT_EQ(2, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 52, 50, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 1, 52, 52, 10}));
 }
 
 
@@ -92,7 +92,7 @@ TEST(FillAndKill, OppositeSide_BuyBook) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 53, 4));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Buy, 52, 15));
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Sell, 52, 20));
+    ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Sell, 52, 20));
 
     EXPECT_EQ(1, ob.size());  // remaining bid level
     auto info = ob.getOrderInfos();
@@ -101,10 +101,10 @@ TEST(FillAndKill, OppositeSide_BuyBook) {
     EXPECT_EQ(9, info.getBids()[0].quantity_);
     EXPECT_TRUE(info.getAsks().empty());
 
-    EXPECT_EQ(3, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {0, 3, 55, 52, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {1, 3, 53, 52, 4}));
-    EXPECT_TRUE(hasTradeLike(trades, {2, 3, 52, 52, 6}));
+    EXPECT_EQ(3, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 3, 55, 52, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 3, 53, 52, 4}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {2, 3, 52, 52, 6}));
 }
 
 TEST(FillAndKill, StopsDueToPrice_NotQuantity) {
@@ -115,7 +115,7 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 52, 10));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Sell, 60, 10)); // too expensive
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 55, 30));
+    ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Buy, 55, 30));
 
     EXPECT_EQ(1, ob.size());
     auto info = ob.getOrderInfos();
@@ -125,9 +125,9 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity) {
     EXPECT_EQ(60, info.getAsks()[0].price_);
     EXPECT_EQ(10, info.getAsks()[0].quantity_);
 
-    ASSERT_EQ(2, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {3, 0, 55, 50, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {3, 1, 55, 52, 10}));
+    ASSERT_EQ(2, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 55, 50, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 1, 55, 52, 10}));
 }
 
 TEST(FillAndKill, StopsDueToPrice_NotQuantity_BuySide) {
@@ -138,7 +138,7 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity_BuySide) {
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 58, 10));
     ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Buy, 50, 10)); // too cheap
 
-    Trades trades = ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Sell, 55, 30));
+    ob.addOrder(f.make(3, OrderType::FillAndKill, Side::Sell, 55, 30));
 
     EXPECT_EQ(1, ob.size());
     auto info = ob.getOrderInfos();
@@ -148,8 +148,8 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity_BuySide) {
     EXPECT_EQ(50, info.getBids()[0].price_);
     EXPECT_EQ(10, info.getBids()[0].quantity_);
 
-    ASSERT_EQ(2, trades.size());
-    EXPECT_TRUE(hasTradeLike(trades, {0, 3, 60, 55, 10}));
-    EXPECT_TRUE(hasTradeLike(trades, {1, 3, 58, 55, 10}));
+    ASSERT_EQ(2, ob.getTrades().size());
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 3, 60, 55, 10}));
+    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 3, 58, 55, 10}));
 }
 

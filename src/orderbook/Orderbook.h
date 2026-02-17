@@ -10,6 +10,7 @@
 #include "Trade.h"
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
+#include "LevelArray.h"
 #include <numeric>
 #include <map>
 #include <iostream>
@@ -21,21 +22,11 @@
 
 class Orderbook {
 private:
-    struct LevelData {
-        Quantity quantity_{};
-        Quantity count_{};
-
-        enum class Action {
-            Add,
-            Remove,
-            Match
-        };
-    };
-
     std::unordered_map<Price, LevelData> levelData_;
-    std::map<Price, Orders, std::greater<>> bids_;
-    std::map<Price, Orders, std::less<>> asks_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
+    Trades trades;
 
     mutable std::mutex orderMutex_{};
     std::thread gfdPruneThread_;
@@ -43,19 +34,6 @@ private:
     std::condition_variable shutdownConditionVariable_{};
 
     friend class PruneTestHelper;
-
-    template<typename T>
-    void pruneStaleFillOrKill(std::map<Price, Orders, T> &orderMap) {
-        if (orderMap.empty()) return;
-
-        auto &[_, orders] {*orderMap.begin()};
-        auto &order = orders.front();
-        if (order.getType() == OrderType::FillAndKill) {
-            cancelOrderInternal(order.getId());
-        } else if (order.getType() == OrderType::FillOrKill) {
-            throw std::logic_error("There was a stale FOK order, should never be possible.");
-        }
-    }
 
     void onOrderMatched(Price price, Quantity quantity, bool fullMatch);
 
@@ -67,9 +45,12 @@ private:
 
     bool canMatch(Side side, Price price);
 
-    Trades matchOrders();
+    void matchOrders();
 
     void cancelOrders(const OrderIds &orderIds);
+
+    template<int N, Side S>
+    void pruneStaleFillOrKill(LevelArray<N, S> &levels);
 
     void cancelOrderInternal(OrderId orderId);
 
@@ -79,17 +60,16 @@ private:
 
     void pruneStaleGoodForNow();
 
-    Trades addOrderInternal(Order order);
-
+    void addOrderInternal(Order order);
 
 public:
     explicit Orderbook(bool startPruneThread = true);
 
     ~Orderbook();
 
-    Trades addOrder(Order order);
+    void addOrder(Order order);
 
-    Trades modifyOrder(OrderModify orderModify);
+    void modifyOrder(OrderModify orderModify);
 
     void cancelOrder(OrderId orderId);
 
@@ -101,6 +81,14 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, Orderbook &ob) {
         return os << ob.getOrderInfos();
+    }
+
+    const Trades &getTrades() const {
+        return trades;
+    }
+
+    void clearTrades() {
+        trades.clear();
     }
 };
 
