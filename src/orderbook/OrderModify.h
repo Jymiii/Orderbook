@@ -31,7 +31,7 @@ public:
         return quantity_;
     }
 
-    [[nodiscard]] Order toOrder(OrderType type) {
+    [[nodiscard]] Order toOrder(OrderType type) const{
         return {id_, type, side_, price_, quantity_};
     }
 

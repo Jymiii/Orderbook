@@ -113,9 +113,9 @@ void Orderbook::cancelOrder(OrderId orderId) {
 
 void Orderbook::modifyOrder(OrderModify orderModify) {
     std::scoped_lock _{orderMutex_};
-    if (!orders_.contains(orderModify.getId())) return;
-    auto &ordersIterator = orders_.at(orderModify.getId());
-    OrderType type{ordersIterator->getType()};
+    auto ordersIterator = orders_.find(orderModify.getId());
+    if (ordersIterator == orders_.end()) return;
+    OrderType type{ordersIterator->second->getType()};
     cancelOrderInternal(orderModify.getId());
     addOrderInternal(orderModify.toOrder(type));
 }

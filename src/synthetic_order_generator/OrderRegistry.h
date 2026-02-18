@@ -2,6 +2,7 @@
 #define ORDERBOOK_ORDERREGISTRY_H
 
 #include "orderbook/Order.h"
+#include "orderbook/OrderModify.h"
 #include <algorithm>
 #include <optional>
 #include <random>
@@ -23,10 +24,10 @@ public:
 
     void onCancel(OrderId id) { erase(id); }
 
-    void onModify(const Order &o) {
+    void onModify(const OrderModify &o) {
         auto it = live_.find(o.getId());
         if (it == live_.end()) return;
-        it->second = o;
+        it->second = o.toOrder(it->second.getType());
     }
 
     bool empty() const { return ids_.empty(); }

@@ -1,7 +1,7 @@
 [README.md](https://github.com/user-attachments/files/25364643/README.md)
 # Orderbook Engine
 
-A high-performance, event-driven limit order book implementation in C++ with simulated market data generation and order execution infrastructure.
+A high-performance, event_-driven limit order book implementation in C++ with simulated market data generation and order execution infrastructure.
 
 ---
 
@@ -160,7 +160,7 @@ src/
 │
 └── synthetic_order_generator/        # Simulation and execution layer
     ├── MarketState.h                  # GBM parameters (mid, drift, sigma, dt, b)
-    ├── OrderEvent.h                   # Order event types
+    ├── OrderEvent.h                   # Order event_ types
     ├── OrderExecutor.h / OrderExecutor.cpp   # Simulation and CSV runner
     ├── OrderGenerator.h / OrderGenerator.cpp # GBM-based order simulator
     ├── OrderRegistry.h                # Tracks generated order IDs
