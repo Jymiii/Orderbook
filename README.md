@@ -93,10 +93,10 @@ This runs the `OrderExecutor` with a default `MarketState` for 10,000 ticks, rep
 On exit, the engine prints average latency for each operation type:
 
 ```
-Average time for an add:          ~250ns
-Average time for a cancel:        ~180ns
-Average time for a modification:  ~420ns
-Modification info: 94.3% went through
+Average time for an add: 161.792ns {Total time spend: 0.00815769, Count: 50421}
+Average time for a cancel: 37.1277ns {Total time spend: 0.00166603, Count: 44873}
+Average time for a modification: 1.64129ns {Total time spend: 8.085e-06, Count: 4926}
+Modification info: 0.649614% went through {Total time spend: 8.085e-06, Count: 32}
 ```
 
 ---
