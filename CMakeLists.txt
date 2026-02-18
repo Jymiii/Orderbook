@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)  # 4.0 is fine if you have it, but 3.25 is more common
+cmake_minimum_required(VERSION 3.25)
 project(Orderbook)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -12,14 +12,20 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# ---- Library: code under test ----
 add_library(orderbook_lib
         src/orderbook/Orderbook.cpp
         src/orderbook/LevelData.h
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# ---- Main executable (NO tests here) ----
+set(ORDERBOOK_ENABLE_INSTRUMENTATION OFF CACHE BOOL "Enable per-operation timing counters" FORCE)
+if (ORDERBOOK_ENABLE_INSTRUMENTATION)
+    message(STATUS "Orderbook instrumentation: ON")
+    target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)
+else()
+    message(STATUS "Orderbook instrumentation: OFF")
+endif()
+
 add_executable(Orderbook main.cpp
         src/synthetic_order_generator/OrderExecutor.h
         src/synthetic_order_generator/OrderGenerator.cpp
@@ -31,7 +37,6 @@ add_executable(Orderbook main.cpp
         src/synthetic_order_generator/OrderExecutor.cpp)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
-# ---- Tests ----
 enable_testing()
 
 add_executable(OrderbookTests

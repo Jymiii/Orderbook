@@ -11,17 +11,20 @@
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
 #include "LevelArray.h"
-#include "shared/Timer.h"
 #include <numeric>
-#include <map>
 #include <iostream>
 #include <chrono>
 #include <ctime>
 #include <thread>
 #include <mutex>
 
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
+#include "shared/Timer.h"
+#endif
+
 class Orderbook {
 private:
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     std::uint64_t addCount_{};
     std::uint64_t cancelCount_{};
     std::uint64_t modifyCount_{};
@@ -29,10 +32,9 @@ private:
     long double addTotalTime_{};
     long double cancelTotalTime_{};
     long double modifyTotalTime_{};
-
     Timer timer_{};
+#endif
 
-    std::unordered_map<Price, LevelData> levelData_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
@@ -45,13 +47,13 @@ private:
 
     friend class PruneTestHelper;
 
-    void onOrderMatched(Price price, Quantity quantity, bool fullMatch);
+    void onOrderMatched(Price price, Quantity quantity, bool fullMatch, Side side);
 
     void onOrderAdded(const Order &order);
 
     void onOrderCanceled(const Order &order);
 
-    void updateLevelData(Price price, Quantity quantity, LevelData::Action);
+    void updateLevelData(Price price, Quantity quantity, LevelData::Action action, Side side);
 
     bool canMatch(Side side, Price price);
 

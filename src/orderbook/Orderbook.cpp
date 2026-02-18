@@ -92,16 +92,20 @@ Orderbook::~Orderbook() {
     shutdownConditionVariable_.notify_all();
     if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
 
-    std::cout << "Average time for an add: " << (addCount_ > 0 ? addTotalTime_ / addCount_ * 1e9 : 0) << "ns {Total time spent: "
-              << addTotalTime_ << ", Count: " << addCount_ << "}" << "\n";
-    std::cout << "Average time for a cancel: " << (cancelCount_ > 0 ? cancelTotalTime_ / cancelCount_ * 1e9 : 0) << "ns {Total time spent: "
-              << cancelTotalTime_ << ", Count: " << cancelCount_ << "}" << "\n";
-    std::cout << "Average time for a modification: " << (modifyCount_ > 0 ? modifyTotalTime_ / modifyCount_ * 1e9 : 0) << "ns {Total time spent: "
-              << modifyTotalTime_ << ", Count: " << modifyCount_ << "}" << "\n";
-    std::cout << "Modification info: " << (modifyCount_ > 0 ? modifyWentThroughCount_ * 1.0 / modifyCount_ * 100 : 0)
-              << "% went through {Total time spent: " << modifyTotalTime_ << ", Count: " << modifyWentThroughCount_ << "}"
-              << "\n";
-
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
+    if (addCount_ > 0)
+        std::cout << "Average time for an add: " << addTotalTime_ / addCount_ * 1e9 << "ns {Total time spent: "
+                  << addTotalTime_ << ", Count: " << addCount_ << "}\n";
+    if (cancelCount_ > 0)
+        std::cout << "Average time for a cancel: " << cancelTotalTime_ / cancelCount_ * 1e9 << "ns {Total time spent: "
+                  << cancelTotalTime_ << ", Count: " << cancelCount_ << "}\n";
+    if (modifyCount_ > 0) {
+        std::cout << "Average time for a modification: " << modifyTotalTime_ / modifyCount_ * 1e9 << "ns {Total time spent: "
+                  << modifyTotalTime_ << ", Count: " << modifyCount_ << "}\n";
+        std::cout << "Modification info: " << modifyWentThroughCount_ * 1.0 / modifyCount_ * 100
+                  << "% went through {Total time spent: " << modifyTotalTime_ << ", Count: " << modifyWentThroughCount_ << "}\n";
+    }
+#endif
 }
 
 
@@ -113,33 +117,48 @@ Orderbook::~Orderbook() {
 }
 
 void Orderbook::addOrder(Order order) {
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addCount_++;
     timer_.start();
+#endif
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addTotalTime_ += timer_.elapsed();
+#endif
 }
 
 void Orderbook::cancelOrder(OrderId orderId) {
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelCount_++;
     timer_.start();
+#endif
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelTotalTime_ += timer_.elapsed();
+#endif
 }
 
 void Orderbook::modifyOrder(OrderModify orderModify) {
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
     timer_.start();
+#endif
     std::scoped_lock _{orderMutex_};
     auto ordersIterator = orders_.find(orderModify.getId());
     if (ordersIterator == orders_.end()) return;
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyWentThroughCount_++;
+#endif
     OrderType type{ordersIterator->second->getType()};
     cancelOrderInternal(orderModify.getId());
     addOrderInternal(orderModify.toOrder(type));
+#ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyTotalTime_ += timer_.elapsed();
+#endif
 }
+
 // ===== Internal cancel / add helpers =====
 
 void Orderbook::cancelOrders(const OrderIds &orderIds) {
@@ -152,7 +171,7 @@ void Orderbook::cancelOrders(const OrderIds &orderIds) {
 
 void Orderbook::cancelOrderInternal(OrderId orderId) {
     auto it = orders_.find(orderId);
-    if (it == orders_.end()) return;
+    if (it == orders_.end()) [[unlikely]] return;
 
     auto listIt = it->second;
 
@@ -162,25 +181,23 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     const Side side = listIt->getSide();
 
     if (side == Side::Buy) {
-        auto &orders = bids_.getOrders(price);
-        orders.erase(listIt);
+        bids_.getOrders(price).erase(listIt);
         bids_.onOrderRemoved(price);
     } else {
-        auto &orders = asks_.getOrders(price);
-        orders.erase(listIt);
+        asks_.getOrders(price).erase(listIt);
         asks_.onOrderRemoved(price);
     }
     orders_.erase(it);
 }
 
 void Orderbook::addOrderInternal(Order order) {
-    if (order.getRemainingQuantity() == 0 || orders_.contains(order.getId())) {
+    if (order.getRemainingQuantity() == 0 || orders_.contains(order.getId())) [[unlikely]] {
         return;
     }
 
     const Side side = order.getSide();
 
-    if (order.getType() == OrderType::Market) {
+    if (order.getType() == OrderType::Market) [[unlikely]] {
         if (side == Side::Sell && !bids_.empty()) {
             const Price worstBidPrice = bids_.getWorstPrice();
             order.toFillAndKill(worstBidPrice);
@@ -236,9 +253,9 @@ bool Orderbook::canMatch(Side side, Price price) {
 
 bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) {
     if (side == Side::Sell) {
-        return bids_.canFullyFill(levelData_, price, quantity);
+        return bids_.canFullyFill(price, quantity);
     } else {
-        return asks_.canFullyFill(levelData_, price, quantity);
+        return asks_.canFullyFill(price, quantity);
     }
 }
 
@@ -267,7 +284,6 @@ void Orderbook::matchOrders() {
             const Price askOrderPrice = askOrder.getPrice();
             const Price bidOrderPrice = bidOrder.getPrice();
             trades_.emplace_back(
-
                     bidOrder.getId(), askOrder.getId(),
                     bidOrderPrice, askOrderPrice,
                     tradedQuantity);
@@ -275,8 +291,8 @@ void Orderbook::matchOrders() {
             const bool bidFilled = bidOrder.isFilled();
             const bool askFilled = askOrder.isFilled();
 
-            onOrderMatched(bidOrderPrice, tradedQuantity, bidFilled);
-            onOrderMatched(askOrderPrice, tradedQuantity, askFilled);
+            onOrderMatched(bidOrderPrice, tradedQuantity, bidFilled, Side::Buy);
+            onOrderMatched(askOrderPrice, tradedQuantity, askFilled, Side::Sell);
 
             if (bidFilled) {
                 orders_.erase(bidOrder.getId());
@@ -323,24 +339,25 @@ void Orderbook::matchOrders() {
 
 // ===== Event-Driven methods ======
 
-void Orderbook::onOrderMatched(Price price, Quantity quantity, bool fullMatch) {
+void Orderbook::onOrderMatched(Price price, Quantity quantity, bool fullMatch, Side side) {
     if (fullMatch) {
-        updateLevelData(price, quantity, LevelData::Action::Remove);
+        updateLevelData(price, quantity, LevelData::Action::Remove, side);
     } else {
-        updateLevelData(price, quantity, LevelData::Action::Match);
+        updateLevelData(price, quantity, LevelData::Action::Match, side);
     }
 }
 
 void Orderbook::onOrderAdded(const Order &order) {
-    updateLevelData(order.getPrice(), order.getRemainingQuantity(), LevelData::Action::Add);
+    updateLevelData(order.getPrice(), order.getRemainingQuantity(), LevelData::Action::Add, order.getSide());
 }
 
 void Orderbook::onOrderCanceled(const Order &order) {
-    updateLevelData(order.getPrice(), order.getRemainingQuantity(), LevelData::Action::Remove);
+    updateLevelData(order.getPrice(), order.getRemainingQuantity(), LevelData::Action::Remove, order.getSide());
 }
 
-void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Action action) {
-    auto &data = levelData_[price];
+void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Action action, Side side) {
+    LevelData &data = (side == Side::Buy) ? bids_.getLevelData(price) : asks_.getLevelData(price);
+
     if (action == LevelData::Action::Add) data.count++;
     else if (action == LevelData::Action::Remove) data.count--;
 
@@ -349,7 +366,4 @@ void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Actio
     } else {
         data.quantity += quantity;
     }
-
-    if (data.count == 0)
-        levelData_.erase(price);
 }
