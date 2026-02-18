@@ -19,7 +19,11 @@ public:
         m_beg = Clock::now();
     }
 
-    double elapsed() const {
+    void start() {
+        m_beg = Clock::now();
+    }
+
+    [[nodiscard]] double elapsed() const {
         return std::chrono::duration_cast<Second>(Clock::now() - m_beg).count();
     }
 };

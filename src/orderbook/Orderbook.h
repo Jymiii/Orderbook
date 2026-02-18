@@ -11,6 +11,7 @@
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
 #include "LevelArray.h"
+#include "synthetic_order_generator/Timer.h"
 #include <numeric>
 #include <map>
 #include <iostream>
@@ -22,6 +23,16 @@
 
 class Orderbook {
 private:
+    std::uint64_t addCount{};
+    std::uint64_t cancelCount{};
+    std::uint64_t modifyCount{};
+    std::uint64_t modifyWentThroughCount{};
+    long double addTotalTime{};
+    long double cancelTotalTime{};
+    long double modifyTotalTime{};
+
+    Timer timer{};
+
     std::unordered_map<Price, LevelData> levelData_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;

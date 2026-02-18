@@ -91,6 +91,12 @@ Orderbook::~Orderbook() {
     }
     shutdownConditionVariable_.notify_all();
     if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
+
+    std::cout << "Average time for an add: " << addTotalTime/addCount*1e9 << "ns {Total time spend: " << addTotalTime << ", Count: " << addCount << "}" << "\n";
+    std::cout << "Average time for a cancel: " << cancelTotalTime/cancelCount*1e9 << "ns {Total time spend: " << cancelTotalTime << ", Count: " << cancelCount << "}" << "\n";
+    std::cout << "Average time for a modification: " << modifyTotalTime/modifyCount*1e9 << "ns {Total time spend: " << modifyTotalTime << ", Count: " << modifyCount << "}" << "\n";
+    std::cout << "Modification info: " << modifyWentThroughCount*1.0/modifyCount*100 << "% went through {Total time spend: " << modifyTotalTime << ", Count: " << modifyWentThroughCount << "}" << "\n";
+
 }
 
 
@@ -102,22 +108,32 @@ Orderbook::~Orderbook() {
 }
 
 void Orderbook::addOrder(Order order) {
+    addCount++;
+    timer.start();
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
+    addTotalTime += timer.elapsed();
 }
 
 void Orderbook::cancelOrder(OrderId orderId) {
+    cancelCount++;
+    timer.start();
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
+    cancelTotalTime += timer.elapsed();
 }
 
 void Orderbook::modifyOrder(OrderModify orderModify) {
+    modifyCount++;
+    timer.start();
     std::scoped_lock _{orderMutex_};
     auto ordersIterator = orders_.find(orderModify.getId());
     if (ordersIterator == orders_.end()) return;
+    modifyWentThroughCount++;
     OrderType type{ordersIterator->second->getType()};
     cancelOrderInternal(orderModify.getId());
     addOrderInternal(orderModify.toOrder(type));
+    modifyTotalTime += timer.elapsed();
 }
 // ===== Internal cancel / add helpers =====
 

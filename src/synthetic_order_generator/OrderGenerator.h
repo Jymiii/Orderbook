@@ -24,14 +24,22 @@ private:
     size_t ticks_{};
 
     std::random_device dev{};
-    static size_t id_;
     std::mt19937 rng{dev()};
     std::normal_distribution<double> normal_distribution{0.0, 1.0};
     std::uniform_real_distribution<double> U{-0.499999999, 0.5};
     std::uniform_real_distribution<double> uniformZeroToOne{0, 1};
     std::bernoulli_distribution bernoulliDistribution{0.5};
 
-    Price getRandomOrderPrice(double mid, Side side);
+
+    static constexpr int eventsPerTick = 10;
+    static constexpr std::array<double, 3> addCancelModOdds{50.0, 45.0, 5.0};
+
+    std::poisson_distribution<int> eventCountRng{eventsPerTick};
+    std::discrete_distribution<int> eventTypeDist{
+            addCancelModOdds.begin(),
+            addCancelModOdds.end()
+    };
+
     double getRandom() { return normal_distribution(rng); }
     double getUSample() { return U(rng); }
     Side getRandomSide();
@@ -40,7 +48,9 @@ private:
     void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent>& out);
     void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent>& out);
 
+    Price getRandomOrderPrice(double mid, Side side);
     constexpr Quantity getRandomQuantity() noexcept;
+    constexpr OrderType getRandomOrderType();
 };
 
 #endif // ORDERBOOK_ORDERGENERATOR_H

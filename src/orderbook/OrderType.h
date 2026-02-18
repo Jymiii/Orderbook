@@ -9,6 +9,7 @@ enum class OrderType {
     FillAndKill,
     Market,
     GoodForDay,
-    FillOrKill
+    FillOrKill,
+    Size
 };
 #endif //ORDERBOOK_ORDERTYPE_H
