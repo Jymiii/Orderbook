@@ -5,13 +5,11 @@
 #include <algorithm>
 #include <vector>
 
-static OrderId id{0};
-
-constexpr Quantity OrderGenerator::getRandomQuantity() noexcept {
+Quantity OrderGenerator::getRandomQuantity() {
     return static_cast<Quantity>(std::abs(getRandom()) * 100 + 1);
 }
 
-int32_t OrderGenerator::getRandomOrderPrice(double mid, Side side) {
+Price OrderGenerator::getRandomOrderPrice(double mid, Side side) {
     const double uSample = getUSample();
     const double d = -state_.b * std::log(1 - 2 * std::abs(uSample));
 
@@ -21,13 +19,13 @@ int32_t OrderGenerator::getRandomOrderPrice(double mid, Side side) {
     return std::max<Price>(1, static_cast<Price>(std::llround(raw)));
 }
 
-constexpr OrderType OrderGenerator::getRandomOrderType() {
-    int type = static_cast<int>(OrderType::Size) * uniformZeroToOne(rng);
+OrderType OrderGenerator::getRandomOrderType() {
+    int type = static_cast<int>(OrderType::Size) * uniformZeroToOne_(rng_);
     return static_cast<OrderType>(type);
 }
 
 Side OrderGenerator::getRandomSide() {
-    return bernoulliDistribution(rng) ? Side::Sell : Side::Buy;
+    return bernoulliDist_(rng_) ? Side::Sell : Side::Buy;
 }
 
 std::vector<OrderEvent> OrderGenerator::generate() {
@@ -42,11 +40,11 @@ std::vector<OrderEvent> OrderGenerator::generate() {
     for (size_t i = 0; i < ticks_; ++i) {
         mid = mid * std::exp((drift - 0.5 * std::pow(sigma, 2)) * dt
                              + std::sqrt(dt) * sigma * getRandom());
-        int eventCount = eventCountRng(rng);
+        int eventCount = eventCountDist_(rng_);
 
         int addCount = 0, cancelCount = 0, modifyCount = 0;
         for (int k = 0; k < eventCount; ++k) {
-            auto type = static_cast<EventType>(eventTypeDist(rng));
+            auto type = static_cast<EventType>(eventTypeDist_(rng_));
             switch (type) {
                 case EventType::New: ++addCount;
                     break;
@@ -65,7 +63,7 @@ std::vector<OrderEvent> OrderGenerator::generate() {
         generateCancelOrderEvents(cancelCount, eventBucket);
         generateAddOrderEvents(mid, addCount, eventBucket);
 
-        std::shuffle(eventBucket.begin(), eventBucket.end(), rng);
+        std::shuffle(eventBucket.begin(), eventBucket.end(), rng_);
         for (const auto &event: eventBucket) {
             orders.push_back(event);
         }
@@ -85,12 +83,12 @@ void OrderGenerator::generateAddOrderEvents(double mid, int addCount, std::vecto
         const Price px = getRandomOrderPrice(mid, side);
         const OrderType type = getRandomOrderType();
 
-        auto newOrder{Order{id++, type, side, px, getRandomQuantity()}};
+        auto newOrder{Order{nextId_++, type, side, px, getRandomQuantity()}};
         out.emplace_back(
                 EventType::New,
                 newOrder
         );
-        registry.onNew(newOrder);
+        registry_.onNew(newOrder);
     }
 }
 
@@ -100,10 +98,10 @@ void OrderGenerator::generateCancelOrderEvents(int cancelCount, std::vector<Orde
     out.reserve(out.size() + static_cast<size_t>(cancelCount));
 
     for (int i = 0; i < cancelCount; ++i) {
-        auto order = registry.randomLive(rng);
+        auto order = registry_.randomLive(rng_);
         if (!order.has_value()) return;
         out.emplace_back(EventType::Cancel, order.value().getId());
-        registry.onCancel(order.value().getId());
+        registry_.onCancel(order.value().getId());
     }
 }
 
@@ -113,20 +111,20 @@ void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount, std:
     out.reserve(out.size() + static_cast<size_t>(modifyCount));
 
     for (int i = 0; i < modifyCount; ++i) {
-        auto order = registry.randomLive(rng);
+        auto order = registry_.randomLive(rng_);
         if (!order.has_value()) return;
 
         Price price = order->getPrice();
         Quantity quantity = order->getRemainingQuantity();
         Side side = order->getSide();
 
-        if (bernoulliDistribution(rng)) {
+        if (bernoulliDist_(rng_)) {
             quantity = getRandomQuantity();
         }
-        if (bernoulliDistribution(rng)) {
+        if (bernoulliDist_(rng_)) {
             side = getRandomSide();
         }
-        if (bernoulliDistribution(rng)) {
+        if (bernoulliDist_(rng_)) {
             price = getRandomOrderPrice(mid, side);
         }
 
@@ -135,6 +133,6 @@ void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount, std:
                 EventType::Modify,
                 modify
         );
-        registry.onModify(modify);
+        registry_.onModify(modify);
     }
 }

@@ -81,7 +81,7 @@ Orderbook::Orderbook(bool startPruneThread) {
             pruneStaleGoodForDay();
         });
     }
-    orders_.reserve(200000);
+    orders_.reserve(Constants::INITIAL_ORDER_CAPACITY);
 }
 
 Orderbook::~Orderbook() {
@@ -92,14 +92,14 @@ Orderbook::~Orderbook() {
     shutdownConditionVariable_.notify_all();
     if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
 
-    std::cout << "Average time for an add: " << addTotalTime / addCount * 1e9 << "ns {Total time spend: "
-              << addTotalTime << ", Count: " << addCount << "}" << "\n";
-    std::cout << "Average time for a cancel: " << cancelTotalTime / cancelCount * 1e9 << "ns {Total time spend: "
-              << cancelTotalTime << ", Count: " << cancelCount << "}" << "\n";
-    std::cout << "Average time for a modification: " << modifyTotalTime / modifyCount * 1e9 << "ns {Total time spend: "
-              << modifyTotalTime << ", Count: " << modifyCount << "}" << "\n";
-    std::cout << "Modification info: " << modifyWentThroughCount * 1.0 / modifyCount * 100
-              << "% went through {Total time spend: " << modifyTotalTime << ", Count: " << modifyWentThroughCount << "}"
+    std::cout << "Average time for an add: " << (addCount_ > 0 ? addTotalTime_ / addCount_ * 1e9 : 0) << "ns {Total time spent: "
+              << addTotalTime_ << ", Count: " << addCount_ << "}" << "\n";
+    std::cout << "Average time for a cancel: " << (cancelCount_ > 0 ? cancelTotalTime_ / cancelCount_ * 1e9 : 0) << "ns {Total time spent: "
+              << cancelTotalTime_ << ", Count: " << cancelCount_ << "}" << "\n";
+    std::cout << "Average time for a modification: " << (modifyCount_ > 0 ? modifyTotalTime_ / modifyCount_ * 1e9 : 0) << "ns {Total time spent: "
+              << modifyTotalTime_ << ", Count: " << modifyCount_ << "}" << "\n";
+    std::cout << "Modification info: " << (modifyCount_ > 0 ? modifyWentThroughCount_ * 1.0 / modifyCount_ * 100 : 0)
+              << "% went through {Total time spent: " << modifyTotalTime_ << ", Count: " << modifyWentThroughCount_ << "}"
               << "\n";
 
 }
@@ -113,32 +113,32 @@ Orderbook::~Orderbook() {
 }
 
 void Orderbook::addOrder(Order order) {
-    addCount++;
-    timer.start();
+    addCount_++;
+    timer_.start();
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
-    addTotalTime += timer.elapsed();
+    addTotalTime_ += timer_.elapsed();
 }
 
 void Orderbook::cancelOrder(OrderId orderId) {
-    cancelCount++;
-    timer.start();
+    cancelCount_++;
+    timer_.start();
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
-    cancelTotalTime += timer.elapsed();
+    cancelTotalTime_ += timer_.elapsed();
 }
 
 void Orderbook::modifyOrder(OrderModify orderModify) {
-    modifyCount++;
-    timer.start();
+    modifyCount_++;
+    timer_.start();
     std::scoped_lock _{orderMutex_};
     auto ordersIterator = orders_.find(orderModify.getId());
     if (ordersIterator == orders_.end()) return;
-    modifyWentThroughCount++;
+    modifyWentThroughCount_++;
     OrderType type{ordersIterator->second->getType()};
     cancelOrderInternal(orderModify.getId());
     addOrderInternal(orderModify.toOrder(type));
-    modifyTotalTime += timer.elapsed();
+    modifyTotalTime_ += timer_.elapsed();
 }
 // ===== Internal cancel / add helpers =====
 
@@ -266,7 +266,7 @@ void Orderbook::matchOrders() {
 
             const Price askOrderPrice = askOrder.getPrice();
             const Price bidOrderPrice = bidOrder.getPrice();
-            trades.emplace_back(
+            trades_.emplace_back(
 
                     bidOrder.getId(), askOrder.getId(),
                     bidOrderPrice, askOrderPrice,
@@ -341,15 +341,15 @@ void Orderbook::onOrderCanceled(const Order &order) {
 
 void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Action action) {
     auto &data = levelData_[price];
-    if (action == LevelData::Action::Add) data.count_++;
-    else if (action == LevelData::Action::Remove) data.count_--;
+    if (action == LevelData::Action::Add) data.count++;
+    else if (action == LevelData::Action::Remove) data.count--;
 
     if (action == LevelData::Action::Remove || action == LevelData::Action::Match) {
-        data.quantity_ -= quantity;
+        data.quantity -= quantity;
     } else {
-        data.quantity_ += quantity;
+        data.quantity += quantity;
     }
 
-    if (data.count_ == 0)
+    if (data.count == 0)
         levelData_.erase(price);
 }

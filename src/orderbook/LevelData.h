@@ -8,8 +8,8 @@
 #include "Usings.h"
 
 struct LevelData {
-    Quantity quantity_{};
-    Quantity count_{};
+    Quantity quantity{};
+    Quantity count{};
 
     enum class Action {
         Add,

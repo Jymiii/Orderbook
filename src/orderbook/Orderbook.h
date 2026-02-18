@@ -11,33 +11,32 @@
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
 #include "LevelArray.h"
-#include "synthetic_order_generator/Timer.h"
+#include "shared/Timer.h"
 #include <numeric>
 #include <map>
 #include <iostream>
 #include <chrono>
 #include <ctime>
-#include <unistd.h>
 #include <thread>
 #include <mutex>
 
 class Orderbook {
 private:
-    std::uint64_t addCount{};
-    std::uint64_t cancelCount{};
-    std::uint64_t modifyCount{};
-    std::uint64_t modifyWentThroughCount{};
-    long double addTotalTime{};
-    long double cancelTotalTime{};
-    long double modifyTotalTime{};
+    std::uint64_t addCount_{};
+    std::uint64_t cancelCount_{};
+    std::uint64_t modifyCount_{};
+    std::uint64_t modifyWentThroughCount_{};
+    long double addTotalTime_{};
+    long double cancelTotalTime_{};
+    long double modifyTotalTime_{};
 
-    Timer timer{};
+    Timer timer_{};
 
     std::unordered_map<Price, LevelData> levelData_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
-    Trades trades;
+    Trades trades_;
 
     mutable std::mutex orderMutex_{};
     std::thread gfdPruneThread_;
@@ -88,18 +87,20 @@ public:
 
     [[nodiscard]] OrderbookLevelInfos getOrderInfos() const;
 
-    bool canFullyFill(Side side, Price price, Quantity quantity);
+    [[nodiscard]] bool canFullyFill(Side side, Price price, Quantity quantity);
 
-    friend std::ostream &operator<<(std::ostream &os, Orderbook &ob) {
+    friend std::ostream &operator<<(std::ostream &os, const Orderbook &ob) {
         return os << ob.getOrderInfos();
     }
 
     const Trades &getTrades() const {
-        return trades;
+        std::scoped_lock _{orderMutex_};
+        return trades_;
     }
 
     void clearTrades() {
-        trades.clear();
+        std::scoped_lock _{orderMutex_};
+        trades_.clear();
     }
 };
 

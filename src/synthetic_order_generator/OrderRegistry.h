@@ -30,7 +30,7 @@ public:
         it->second = o.toOrder(it->second.getType());
     }
 
-    bool empty() const { return ids_.empty(); }
+    [[nodiscard]] bool empty() const { return ids_.empty(); }
 
     std::optional<Order> randomLive(std::mt19937 &rng) const {
         if (ids_.empty()) return std::nullopt;

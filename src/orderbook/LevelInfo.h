@@ -8,11 +8,11 @@
 #include "Usings.h"
 
 struct LevelInfo {
-    Price price_;
-    Quantity quantity_;
+    Price price;
+    Quantity quantity;
 
     friend std::ostream &operator<<(std::ostream &os, const LevelInfo &info) {
-        os << "price: " << info.price_ << " Quantity: " << info.quantity_;
+        os << "price: " << info.price << " Quantity: " << info.quantity;
         return os;
     }
 };

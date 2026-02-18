@@ -1,5 +1,5 @@
-#ifndef LEVEL_ARRAY_H
-#define LEVEL_ARRAY_H
+#ifndef ORDERBOOK_LEVELARRAY_H
+#define ORDERBOOK_LEVELARRAY_H
 
 #include "Side.h"
 #include "LevelData.h"
@@ -48,13 +48,13 @@ public:
 
     Orders &getOrders(Price price) {
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
+        if (idx < 0 || idx >= N) throw std::logic_error("Didn't resize in time");
         return levels_[idx];
     }
 
     [[nodiscard]] const Orders &getOrders(Price price) const {
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
+        if (idx < 0 || idx >= N) throw std::logic_error("Didn't resize in time");
         return levels_[idx];
     }
 
@@ -96,7 +96,7 @@ public:
     void onOrderAdded(Price price) {
         const int idx = priceToIndex(price);
 
-        if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
+        if (idx < 0 || idx >= N) throw std::logic_error("Didn't resize in time");
 
         if (empty_) {
             bestIdx_ = worstIdx_ = idx;
@@ -113,7 +113,7 @@ public:
         if (empty_) return;
 
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) throw std::logic_error("Didnt resize in time");
+        if (idx < 0 || idx >= N) throw std::logic_error("Didn't resize in time");
 
         const bool removedBest = (idx == bestIdx_);
         const bool removedWorst = (idx == worstIdx_);
@@ -136,7 +136,7 @@ public:
                 const Price p = indexToPrice(i);
                 auto it = levelDatas.find(p);
                 if (it != levelDatas.end()) {
-                    const Quantity lvlQty = it->second.quantity_;
+                    const Quantity lvlQty = it->second.quantity;
                     if (lvlQty >= quantity) return true;
                     quantity -= lvlQty;
                 }
@@ -205,9 +205,6 @@ private:
     int bestIdx_{P::start(N)};
     int worstIdx_{P::start(N)};
     bool empty_{true};
-
-    Price lowerBound_{0};
-    Price upperBound_{static_cast<Price>(N - 1)};
 };
 
-#endif
+#endif //ORDERBOOK_LEVELARRAY_H

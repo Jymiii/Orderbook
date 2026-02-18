@@ -13,23 +13,23 @@ public:
             : bidId_{bidId}, askId_{askId}, bidPrice_{bidPrice}, askPrice_{askPrice},
               quantity_{quantity} {}
 
-    OrderId getBidId() const {
+    [[nodiscard]] OrderId getBidId() const {
         return bidId_;
     }
 
-    OrderId getAskId() const {
+    [[nodiscard]] OrderId getAskId() const {
         return askId_;
     }
 
-    Price getBidPrice() const {
+    [[nodiscard]] Price getBidPrice() const {
         return bidPrice_;
     }
 
-    Price getAskPrice() const {
+    [[nodiscard]] Price getAskPrice() const {
         return askPrice_;
     }
 
-    Quantity getQuantity() const {
+    [[nodiscard]] Quantity getQuantity() const {
         return quantity_;
     }
 

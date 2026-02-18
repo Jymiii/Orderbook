@@ -30,8 +30,8 @@ TEST(Guards, DuplicateOrderId_SecondIsIgnored) {
 
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(100, info.getBids()[0].price_);
-    EXPECT_EQ(5, info.getBids()[0].quantity_);
+    EXPECT_EQ(100, info.getBids()[0].price);
+    EXPECT_EQ(5, info.getBids()[0].quantity);
 }
 
 TEST(Guards, CancelNonExistentId_IsNoOp) {
@@ -81,8 +81,8 @@ TEST(PriceTimePriority, SamePriceFIFO_SellSide) {
     EXPECT_EQ(1, ob.size());
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(100, info.getAsks()[0].price_);
-    EXPECT_EQ(3, info.getAsks()[0].quantity_);
+    EXPECT_EQ(100, info.getAsks()[0].price);
+    EXPECT_EQ(3, info.getAsks()[0].quantity);
 }
 
 TEST(PriceTimePriority, SamePriceFIFO_BuySide) {
@@ -102,7 +102,7 @@ TEST(PriceTimePriority, SamePriceFIFO_BuySide) {
     EXPECT_EQ(2, ob.size());
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(8, info.getBids()[0].quantity_);
+    EXPECT_EQ(8, info.getBids()[0].quantity);
 }
 
 
@@ -121,14 +121,14 @@ TEST(OrderInfosOrdering, BidsDescending_AsksAscending) {
     auto info = ob.getOrderInfos();
 
     ASSERT_EQ(3, info.getBids().size());
-    EXPECT_EQ(95, info.getBids()[0].price_);
-    EXPECT_EQ(90, info.getBids()[1].price_);
-    EXPECT_EQ(80, info.getBids()[2].price_);
+    EXPECT_EQ(95, info.getBids()[0].price);
+    EXPECT_EQ(90, info.getBids()[1].price);
+    EXPECT_EQ(80, info.getBids()[2].price);
 
     ASSERT_EQ(3, info.getAsks().size());
-    EXPECT_EQ(100, info.getAsks()[0].price_);
-    EXPECT_EQ(110, info.getAsks()[1].price_);
-    EXPECT_EQ(120, info.getAsks()[2].price_);
+    EXPECT_EQ(100, info.getAsks()[0].price);
+    EXPECT_EQ(110, info.getAsks()[1].price);
+    EXPECT_EQ(120, info.getAsks()[2].price);
 }
 
 
@@ -202,8 +202,8 @@ TEST(FillOrKill, BookUnchangedOnFailure) {
 
     ASSERT_EQ(before.getAsks().size(), after.getAsks().size());
     for (std::size_t i = 0; i < before.getAsks().size(); ++i) {
-        EXPECT_EQ(before.getAsks()[i].price_, after.getAsks()[i].price_);
-        EXPECT_EQ(before.getAsks()[i].quantity_, after.getAsks()[i].quantity_);
+        EXPECT_EQ(before.getAsks()[i].price, after.getAsks()[i].price);
+        EXPECT_EQ(before.getAsks()[i].quantity, after.getAsks()[i].quantity);
     }
 }
 
@@ -232,8 +232,8 @@ TEST(FillOrKill, OneUnitShort_Fails) {
     EXPECT_EQ(1, ob.size());
     auto info = ob.getOrderInfos();
     ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(100, info.getAsks()[0].price_);
-    EXPECT_EQ(9, info.getAsks()[0].quantity_);
+    EXPECT_EQ(100, info.getAsks()[0].price);
+    EXPECT_EQ(9, info.getAsks()[0].quantity);
 }
 
 TEST(FillOrKill, DoesNotRestInBook) {
@@ -450,8 +450,8 @@ TEST(GoodTillCancel, MultiLevelSweep_CorrectResidualAfterEachLevel) {
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getBids().empty());
     ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(102, info.getAsks()[0].price_);
-    EXPECT_EQ(5, info.getAsks()[0].quantity_);
+    EXPECT_EQ(102, info.getAsks()[0].price);
+    EXPECT_EQ(5, info.getAsks()[0].quantity);
     EXPECT_EQ(1, ob.size());
 }
 
@@ -470,6 +470,6 @@ TEST(GoodTillCancel, BidResidualRestsAfterPartialMatch) {
     auto info = ob.getOrderInfos();
     EXPECT_TRUE(info.getAsks().empty());
     ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(100, info.getBids()[0].price_);
-    EXPECT_EQ(7, info.getBids()[0].quantity_);
+    EXPECT_EQ(100, info.getBids()[0].price);
+    EXPECT_EQ(7, info.getBids()[0].quantity);
 }

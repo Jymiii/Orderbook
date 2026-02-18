@@ -33,18 +33,18 @@ TEST(GoodTillCancel, AddBuys_AggregatesLevels) {
 
     auto it = info.getBids().begin();
     ASSERT_NE(it, info.getBids().end());
-    EXPECT_EQ(it->price_, 61);
-    EXPECT_EQ(it->quantity_, 10);
+    EXPECT_EQ(it->price, 61);
+    EXPECT_EQ(it->quantity, 10);
 
     ++it;
     ASSERT_NE(it, info.getBids().end());
-    EXPECT_EQ(it->price_, 60);
-    EXPECT_EQ(it->quantity_, 14);
+    EXPECT_EQ(it->price, 60);
+    EXPECT_EQ(it->quantity, 14);
 
     ++it;
     ASSERT_NE(it, info.getBids().end());
-    EXPECT_EQ(it->price_, 50);
-    EXPECT_EQ(it->quantity_, 2);
+    EXPECT_EQ(it->price, 50);
+    EXPECT_EQ(it->quantity, 2);
 }
 
 TEST(GoodTillCancel, AddSells_AggregatesLevels) {
@@ -70,18 +70,18 @@ TEST(GoodTillCancel, AddSells_AggregatesLevels) {
 
     auto it = info.getAsks().begin();
     ASSERT_NE(it, info.getAsks().end());
-    EXPECT_EQ(it->price_, 50);
-    EXPECT_EQ(it->quantity_, 2);
+    EXPECT_EQ(it->price, 50);
+    EXPECT_EQ(it->quantity, 2);
 
     ++it;
     ASSERT_NE(it, info.getAsks().end());
-    EXPECT_EQ(it->price_, 60);
-    EXPECT_EQ(it->quantity_, 14);
+    EXPECT_EQ(it->price, 60);
+    EXPECT_EQ(it->quantity, 14);
 
     ++it;
     ASSERT_NE(it, info.getAsks().end());
-    EXPECT_EQ(it->price_, 61);
-    EXPECT_EQ(it->quantity_, 10);
+    EXPECT_EQ(it->price, 61);
+    EXPECT_EQ(it->quantity, 10);
 }
 
 TEST(GoodTillCancel, Matching_ProducesTradesAndUpdatesBook) {
@@ -113,8 +113,8 @@ TEST(GoodTillCancel, Matching_ProducesTradesAndUpdatesBook) {
 
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getAsks().size(), 1);
-    EXPECT_EQ(info.getAsks().begin()->price_, 60);
-    EXPECT_EQ(info.getAsks().begin()->quantity_, 10);
+    EXPECT_EQ(info.getAsks().begin()->price, 60);
+    EXPECT_EQ(info.getAsks().begin()->quantity, 10);
     EXPECT_EQ(info.getBids().size(), 1);
     EXPECT_EQ(ob.size(), 2);
 
@@ -153,21 +153,21 @@ TEST(GoodTillCancel, CancelingChangesBook) {
     ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 20));
     OrderbookLevelInfos infos = ob.getOrderInfos();
 
-    EXPECT_EQ(50, infos.getAsks()[2].quantity_);
-    EXPECT_EQ(102, infos.getAsks()[2].price_);
-    EXPECT_EQ(10, infos.getAsks()[0].quantity_);
+    EXPECT_EQ(50, infos.getAsks()[2].quantity);
+    EXPECT_EQ(102, infos.getAsks()[2].price);
+    EXPECT_EQ(10, infos.getAsks()[0].quantity);
     EXPECT_EQ(4, ob.size());
 
     ob.cancelOrder(3);
     infos = ob.getOrderInfos();
-    EXPECT_EQ(30, infos.getAsks()[2].quantity_);
-    EXPECT_EQ(102, infos.getAsks()[2].price_);
+    EXPECT_EQ(30, infos.getAsks()[2].quantity);
+    EXPECT_EQ(102, infos.getAsks()[2].price);
 
     ob.addOrder(f.make(3, OrderType::GoodTillCancel, Side::Sell, 102, 20));
     infos = ob.getOrderInfos();
-    EXPECT_EQ(50, infos.getAsks()[2].quantity_);
-    EXPECT_EQ(102, infos.getAsks()[2].price_);
-    EXPECT_EQ(10, infos.getAsks()[0].quantity_);
+    EXPECT_EQ(50, infos.getAsks()[2].quantity);
+    EXPECT_EQ(102, infos.getAsks()[2].price);
+    EXPECT_EQ(10, infos.getAsks()[0].quantity);
     EXPECT_EQ(4, ob.size());
 }
 
@@ -209,8 +209,8 @@ TEST(GoodTillCancel, ModifyOrder_UpdatesPriceAndQuantity) {
 
     EXPECT_EQ(ob.size(), 1);
     ASSERT_EQ(info.getBids().size(), 1);
-    EXPECT_EQ(info.getBids()[0].price_, 100);
-    EXPECT_EQ(info.getBids()[0].quantity_, 10);
+    EXPECT_EQ(info.getBids()[0].price, 100);
+    EXPECT_EQ(info.getBids()[0].quantity, 10);
 
     ob.modifyOrder(OrderModify{0, Side::Buy, 105, 7});
     EXPECT_TRUE(ob.getTrades().empty());
@@ -220,8 +220,8 @@ TEST(GoodTillCancel, ModifyOrder_UpdatesPriceAndQuantity) {
     EXPECT_TRUE(info.getAsks().empty());
     ASSERT_EQ(info.getBids().size(), 1);
 
-    EXPECT_EQ(info.getBids()[0].price_, 105);
-    EXPECT_EQ(info.getBids()[0].quantity_, 7);
+    EXPECT_EQ(info.getBids()[0].price, 105);
+    EXPECT_EQ(info.getBids()[0].quantity, 7);
 }
 
 TEST(GoodTillCancel, ModifyOrder_UnknownId_DoesNothing) {
@@ -244,10 +244,10 @@ TEST(GoodTillCancel, ModifyOrder_UnknownId_DoesNothing) {
     ASSERT_EQ(after.getBids().size(), 1);
     ASSERT_EQ(after.getAsks().size(), 1);
 
-    EXPECT_EQ(after.getBids()[0].price_, before.getBids()[0].price_);
-    EXPECT_EQ(after.getBids()[0].quantity_, before.getBids()[0].quantity_);
-    EXPECT_EQ(after.getAsks()[0].price_, before.getAsks()[0].price_);
-    EXPECT_EQ(after.getAsks()[0].quantity_, before.getAsks()[0].quantity_);
+    EXPECT_EQ(after.getBids()[0].price, before.getBids()[0].price);
+    EXPECT_EQ(after.getBids()[0].quantity, before.getBids()[0].quantity);
+    EXPECT_EQ(after.getAsks()[0].price, before.getAsks()[0].price);
+    EXPECT_EQ(after.getAsks()[0].quantity, before.getAsks()[0].quantity);
 }
 
 TEST(GoodTillCancel, ModifyOrder_AllowsNewTradesToHappen) {

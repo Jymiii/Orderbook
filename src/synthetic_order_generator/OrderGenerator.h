@@ -19,30 +19,31 @@ public:
     OrderGenerator(MarketState state, size_t ticks) : state_{state}, ticks_{ticks} {}
 
 private:
-    OrderRegistry registry{};
+    OrderId nextId_{0};
+    OrderRegistry registry_{};
     MarketState state_{};
     size_t ticks_{};
 
-    std::random_device dev{};
-    std::mt19937 rng{dev()};
-    std::normal_distribution<double> normal_distribution{0.0, 1.0};
-    std::uniform_real_distribution<double> U{-0.499999999, 0.5};
-    std::uniform_real_distribution<double> uniformZeroToOne{0, 1};
-    std::bernoulli_distribution bernoulliDistribution{0.5};
+    std::random_device dev_{};
+    std::mt19937 rng_{dev_()};
+    std::normal_distribution<double> normalDist_{0.0, 1.0};
+    std::uniform_real_distribution<double> uniformSpread_{-0.499999999, 0.5};
+    std::uniform_real_distribution<double> uniformZeroToOne_{0, 1};
+    std::bernoulli_distribution bernoulliDist_{0.5};
 
 
     static constexpr int eventsPerTick = 10;
     static constexpr std::array<double, 3> addCancelModOdds{50.0, 45.0, 5.0};
 
-    std::poisson_distribution<int> eventCountRng{eventsPerTick};
-    std::discrete_distribution<int> eventTypeDist{
+    std::poisson_distribution<int> eventCountDist_{eventsPerTick};
+    std::discrete_distribution<int> eventTypeDist_{
             addCancelModOdds.begin(),
             addCancelModOdds.end()
     };
 
-    double getRandom() { return normal_distribution(rng); }
+    double getRandom() { return normalDist_(rng_); }
 
-    double getUSample() { return U(rng); }
+    double getUSample() { return uniformSpread_(rng_); }
 
     Side getRandomSide();
 
@@ -54,9 +55,9 @@ private:
 
     Price getRandomOrderPrice(double mid, Side side);
 
-    constexpr Quantity getRandomQuantity() noexcept;
+    Quantity getRandomQuantity();
 
-    constexpr OrderType getRandomOrderType();
+    OrderType getRandomOrderType();
 };
 
 #endif // ORDERBOOK_ORDERGENERATOR_H

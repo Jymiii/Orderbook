@@ -72,11 +72,11 @@ TEST(FillAndKill, LeavesBookIfNotFullyMatchedOtherSide) {
     EXPECT_TRUE(info.getBids().empty());
     ASSERT_EQ(2, info.getAsks().size());
 
-    EXPECT_EQ(52, info.getAsks()[0].price_);
-    EXPECT_EQ(5, info.getAsks()[0].quantity_);
+    EXPECT_EQ(52, info.getAsks()[0].price);
+    EXPECT_EQ(5, info.getAsks()[0].quantity);
 
-    EXPECT_EQ(55, info.getAsks()[1].price_);
-    EXPECT_EQ(10, info.getAsks()[1].quantity_);
+    EXPECT_EQ(55, info.getAsks()[1].price);
+    EXPECT_EQ(10, info.getAsks()[1].quantity);
 
     ASSERT_EQ(2, ob.getTrades().size());
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 52, 50, 10}));
@@ -97,8 +97,8 @@ TEST(FillAndKill, OppositeSide_BuyBook) {
     EXPECT_EQ(1, ob.size());  // remaining bid level
     auto info = ob.getOrderInfos();
     EXPECT_EQ(1, info.getBids().size());
-    EXPECT_EQ(52, info.getBids()[0].price_);
-    EXPECT_EQ(9, info.getBids()[0].quantity_);
+    EXPECT_EQ(52, info.getBids()[0].price);
+    EXPECT_EQ(9, info.getBids()[0].quantity);
     EXPECT_TRUE(info.getAsks().empty());
 
     EXPECT_EQ(3, ob.getTrades().size());
@@ -122,8 +122,8 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity) {
 
     EXPECT_TRUE(info.getBids().empty());
     ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(60, info.getAsks()[0].price_);
-    EXPECT_EQ(10, info.getAsks()[0].quantity_);
+    EXPECT_EQ(60, info.getAsks()[0].price);
+    EXPECT_EQ(10, info.getAsks()[0].quantity);
 
     ASSERT_EQ(2, ob.getTrades().size());
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 55, 50, 10}));
@@ -145,8 +145,8 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity_BuySide) {
 
     EXPECT_TRUE(info.getAsks().empty());
     ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(50, info.getBids()[0].price_);
-    EXPECT_EQ(10, info.getBids()[0].quantity_);
+    EXPECT_EQ(50, info.getBids()[0].price);
+    EXPECT_EQ(10, info.getBids()[0].quantity);
 
     ASSERT_EQ(2, ob.getTrades().size());
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 3, 60, 55, 10}));

@@ -105,7 +105,7 @@ std::vector<OrderEvent> OrderExecutor::getOrdersFromCsv(const std::string &path)
                                       static_cast<Price>(std::stoll(members[4])),
                                       static_cast<Quantity>(std::stoll(members[5]))});
         } else if (action == static_cast<int>(EventType::Modify)) {
-            events.emplace_back(EventType::New,
+            events.emplace_back(EventType::Modify,
                                 OrderModify{static_cast<OrderId>(std::stoll(members[1])),
                                             static_cast<Side>(std::stoi(members[2])),
                                             static_cast<Price>(std::stoll(members[3])),

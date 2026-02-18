@@ -22,11 +22,6 @@ enum class EventType : int {
     New = 0, Cancel = 1, Modify = 2
 };
 
-template<class E>
-constexpr std::underlying_type_t<E> to_underlying(E e) noexcept {
-    return static_cast<std::underlying_type_t<E>>(e);
-}
-
 struct OrderEvent {
     using Payload = std::variant<Order, OrderModify, OrderId>;
 
@@ -45,24 +40,24 @@ struct OrderEvent {
     friend std::ostream &operator<<(std::ostream &os, const OrderEvent &e) {
         std::visit(Overloaded{
                 [&](Order const &o) {
-                    os << to_underlying(EventType::New)
+                    os << std::to_underlying(EventType::New)
                        << "," << o.getId()
-                       << "," << to_underlying(o.getType())
-                       << "," << to_underlying(o.getSide())
+                       << "," << std::to_underlying(o.getType())
+                       << "," << std::to_underlying(o.getSide())
                        << "," << o.getPrice()
                        << "," << o.getRemainingQuantity()
                        << "\n";
                 },
                 [&](OrderModify const &m) {
-                    os << to_underlying(EventType::Modify)
+                    os << std::to_underlying(EventType::Modify)
                        << "," << m.getId()
-                       << "," << to_underlying(m.getSide())
+                       << "," << std::to_underlying(m.getSide())
                        << "," << m.getPrice()
                        << "," << m.getQuantity()
                        << "\n";
                 },
                 [&](OrderId const &id) {
-                    os << to_underlying(EventType::Cancel)
+                    os << std::to_underlying(EventType::Cancel)
                        << "," << id
                        << "\n";
                 }

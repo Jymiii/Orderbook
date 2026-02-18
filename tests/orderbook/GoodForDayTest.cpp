@@ -21,10 +21,10 @@ TEST(GoodForDay, PruneStaleGoodForNow_RemovesOnlyGFD) {
     auto info = ob.getOrderInfos();
 
     ASSERT_EQ(1, info.getBids().size());
-    EXPECT_EQ(51, info.getBids()[0].price_);
-    EXPECT_EQ(5, info.getBids()[0].quantity_);
+    EXPECT_EQ(51, info.getBids()[0].price);
+    EXPECT_EQ(5, info.getBids()[0].quantity);
 
     ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(61, info.getAsks()[0].price_);
-    EXPECT_EQ(3, info.getAsks()[0].quantity_);
+    EXPECT_EQ(61, info.getAsks()[0].price);
+    EXPECT_EQ(3, info.getAsks()[0].quantity);
 }

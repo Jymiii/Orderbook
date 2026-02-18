@@ -9,6 +9,7 @@
 #include "Side.h"
 #include "OrderType.h"
 #include "Constants.h"
+#include <cassert>
 #include <iostream>
 #include <list>
 
