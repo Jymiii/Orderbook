@@ -75,7 +75,7 @@ double OrderExecutor::runFromSimulation() {
     else return executeOrdersPersist(events);
 }
 
-double OrderExecutor::runFromCsv(const std::string& csv_path) {
+double OrderExecutor::runFromCsv(const std::string &csv_path) {
     std::vector<OrderEvent> orders = getOrdersFromCsv(csv_path);
     return executeOrders(orders);
 }
@@ -107,11 +107,10 @@ std::vector<OrderEvent> OrderExecutor::getOrdersFromCsv(const std::string &path)
         } else if (action == static_cast<int>(EventType::Modify)) {
             events.emplace_back(EventType::New,
                                 OrderModify{static_cast<OrderId>(std::stoll(members[1])),
-                                      static_cast<Side>(std::stoi(members[2])),
-                                      static_cast<Price>(std::stoll(members[3])),
-                                      static_cast<Quantity>(std::stoll(members[4]))});
-        }
-        else if (action == static_cast<int>(EventType::Cancel)) {
+                                            static_cast<Side>(std::stoi(members[2])),
+                                            static_cast<Price>(std::stoll(members[3])),
+                                            static_cast<Quantity>(std::stoll(members[4]))});
+        } else if (action == static_cast<int>(EventType::Cancel)) {
             events.push_back(OrderEvent::Cancel(static_cast<OrderId>(std::stoll(members[1]))));
         }
     }

@@ -3,6 +3,7 @@
 //
 #ifndef ORDERBOOK_ORDEREVENT_H
 #define ORDERBOOK_ORDEREVENT_H
+
 #include <variant>
 #include <type_traits>
 #include <ostream>
@@ -11,13 +12,17 @@
 
 
 template<class... Ts>
-struct Overloaded : Ts... { using Ts::operator()...; };
+struct Overloaded : Ts ... {
+    using Ts::operator()...;
+};
 template<class... Ts>
 Overloaded(Ts...) -> Overloaded<Ts...>;
 
-enum class EventType : int { New = 0, Cancel = 1, Modify = 2 };
+enum class EventType : int {
+    New = 0, Cancel = 1, Modify = 2
+};
 
-template <class E>
+template<class E>
 constexpr std::underlying_type_t<E> to_underlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
 }
@@ -30,14 +35,16 @@ struct OrderEvent {
 
     // Convenience constructors (so emplace_back is clean)
     static OrderEvent New(Order o) { return {EventType::New, std::move(o)}; }
+
     static OrderEvent Modify(OrderModify m) { return {EventType::Modify, std::move(m)}; }
+
     static OrderEvent Cancel(OrderId id) { return {EventType::Cancel, id}; }
 
     OrderEvent(EventType t, Payload p) : event_(t), payload(std::move(p)) {}
 
-    friend std::ostream& operator<<(std::ostream& os, const OrderEvent& e) {
+    friend std::ostream &operator<<(std::ostream &os, const OrderEvent &e) {
         std::visit(Overloaded{
-                [&](Order const& o) {
+                [&](Order const &o) {
                     os << to_underlying(EventType::New)
                        << "," << o.getId()
                        << "," << to_underlying(o.getType())
@@ -46,7 +53,7 @@ struct OrderEvent {
                        << "," << o.getRemainingQuantity()
                        << "\n";
                 },
-                [&](OrderModify const& m) {
+                [&](OrderModify const &m) {
                     os << to_underlying(EventType::Modify)
                        << "," << m.getId()
                        << "," << to_underlying(m.getSide())
@@ -54,7 +61,7 @@ struct OrderEvent {
                        << "," << m.getQuantity()
                        << "\n";
                 },
-                [&](OrderId const& id) {
+                [&](OrderId const &id) {
                     os << to_underlying(EventType::Cancel)
                        << "," << id
                        << "\n";
@@ -65,4 +72,5 @@ struct OrderEvent {
     }
 
 };
+
 #endif //ORDERBOOK_ORDEREVENT_H

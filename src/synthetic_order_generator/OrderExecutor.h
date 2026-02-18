@@ -15,7 +15,7 @@ public:
 
     OrderExecutor(MarketState state, size_t ticks, std::string persist_path = "");
 
-    double run(const std::string& csv_path = "");
+    double run(const std::string &csv_path = "");
 
     Orderbook &getOrderbook();
 
@@ -24,9 +24,9 @@ private:
     OrderGenerator generator_{MarketState{}, 100000};
     std::string persist_path_{};
 
-    double runFromCsv(const std::string& csv_path);
+    double runFromCsv(const std::string &csv_path);
 
-    static std::vector<OrderEvent> getOrdersFromCsv(const std::string& path);
+    static std::vector<OrderEvent> getOrdersFromCsv(const std::string &path);
 
     double executeOrders(std::vector<OrderEvent> &orders);
 

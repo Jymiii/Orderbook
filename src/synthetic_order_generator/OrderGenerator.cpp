@@ -22,7 +22,7 @@ int32_t OrderGenerator::getRandomOrderPrice(double mid, Side side) {
 }
 
 constexpr OrderType OrderGenerator::getRandomOrderType() {
-    int type = static_cast<int>(OrderType::Size) * uniformZeroToOne( rng );
+    int type = static_cast<int>(OrderType::Size) * uniformZeroToOne(rng);
     return static_cast<OrderType>(type);
 }
 
@@ -48,9 +48,12 @@ std::vector<OrderEvent> OrderGenerator::generate() {
         for (int k = 0; k < eventCount; ++k) {
             auto type = static_cast<EventType>(eventTypeDist(rng));
             switch (type) {
-                case EventType::New: ++addCount; break;
-                case EventType::Cancel: ++cancelCount; break;
-                case EventType::Modify: ++modifyCount; break;
+                case EventType::New: ++addCount;
+                    break;
+                case EventType::Cancel: ++cancelCount;
+                    break;
+                case EventType::Modify: ++modifyCount;
+                    break;
             }
         }
 
@@ -82,7 +85,7 @@ void OrderGenerator::generateAddOrderEvents(double mid, int addCount, std::vecto
         const Price px = getRandomOrderPrice(mid, side);
         const OrderType type = getRandomOrderType();
 
-        auto newOrder {Order{id++, type, side, px, getRandomQuantity()}};
+        auto newOrder{Order{id++, type, side, px, getRandomQuantity()}};
         out.emplace_back(
                 EventType::New,
                 newOrder
@@ -127,7 +130,7 @@ void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount, std:
             price = getRandomOrderPrice(mid, side);
         }
 
-        auto modify {OrderModify{order->getId(), side, price, quantity}};
+        auto modify{OrderModify{order->getId(), side, price, quantity}};
         out.emplace_back(
                 EventType::Modify,
                 modify

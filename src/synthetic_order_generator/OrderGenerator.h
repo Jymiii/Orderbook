@@ -41,15 +41,21 @@ private:
     };
 
     double getRandom() { return normal_distribution(rng); }
+
     double getUSample() { return U(rng); }
+
     Side getRandomSide();
 
-    void generateAddOrderEvents(double mid, int addCount, std::vector<OrderEvent>& out);
-    void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent>& out);
-    void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent>& out);
+    void generateAddOrderEvents(double mid, int addCount, std::vector<OrderEvent> &out);
+
+    void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent> &out);
+
+    void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
 
     Price getRandomOrderPrice(double mid, Side side);
+
     constexpr Quantity getRandomQuantity() noexcept;
+
     constexpr OrderType getRandomOrderType();
 };
 

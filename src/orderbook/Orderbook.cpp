@@ -92,10 +92,15 @@ Orderbook::~Orderbook() {
     shutdownConditionVariable_.notify_all();
     if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
 
-    std::cout << "Average time for an add: " << addTotalTime/addCount*1e9 << "ns {Total time spend: " << addTotalTime << ", Count: " << addCount << "}" << "\n";
-    std::cout << "Average time for a cancel: " << cancelTotalTime/cancelCount*1e9 << "ns {Total time spend: " << cancelTotalTime << ", Count: " << cancelCount << "}" << "\n";
-    std::cout << "Average time for a modification: " << modifyTotalTime/modifyCount*1e9 << "ns {Total time spend: " << modifyTotalTime << ", Count: " << modifyCount << "}" << "\n";
-    std::cout << "Modification info: " << modifyWentThroughCount*1.0/modifyCount*100 << "% went through {Total time spend: " << modifyTotalTime << ", Count: " << modifyWentThroughCount << "}" << "\n";
+    std::cout << "Average time for an add: " << addTotalTime / addCount * 1e9 << "ns {Total time spend: "
+              << addTotalTime << ", Count: " << addCount << "}" << "\n";
+    std::cout << "Average time for a cancel: " << cancelTotalTime / cancelCount * 1e9 << "ns {Total time spend: "
+              << cancelTotalTime << ", Count: " << cancelCount << "}" << "\n";
+    std::cout << "Average time for a modification: " << modifyTotalTime / modifyCount * 1e9 << "ns {Total time spend: "
+              << modifyTotalTime << ", Count: " << modifyCount << "}" << "\n";
+    std::cout << "Modification info: " << modifyWentThroughCount * 1.0 / modifyCount * 100
+              << "% went through {Total time spend: " << modifyTotalTime << ", Count: " << modifyWentThroughCount << "}"
+              << "\n";
 
 }
 
