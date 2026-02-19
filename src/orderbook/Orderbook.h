@@ -19,7 +19,9 @@
 #include <mutex>
 
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
+
 #include "shared/Timer.h"
+
 #endif
 
 class Orderbook {

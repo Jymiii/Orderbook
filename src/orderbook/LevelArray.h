@@ -15,16 +15,22 @@ struct BestScanPolicy;
 template<>
 struct BestScanPolicy<Side::Sell> {
     static constexpr int start(int) { return 0; }
+
     static constexpr int end(int N) { return N; }
+
     static constexpr int step = +1;
+
     static constexpr bool better(int a, int b) { return a <= b; }
 };
 
 template<>
 struct BestScanPolicy<Side::Buy> {
     static constexpr int start(int N) { return N - 1; }
+
     static constexpr int end(int) { return -1; }
+
     static constexpr int step = -1;
+
     static constexpr bool better(int a, int b) { return a >= b; }
 };
 
@@ -34,7 +40,9 @@ class LevelArray {
 
 public:
     LevelArray() = default;
+
     LevelArray(const LevelArray &) = delete;
+
     LevelArray &operator=(const LevelArray &) = delete;
 
     Orders &getOrders(Price price) {
