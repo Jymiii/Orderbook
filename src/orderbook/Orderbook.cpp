@@ -99,12 +99,6 @@ Orderbook::~Orderbook() {
     if (cancelCount_ > 0)
         std::cout << "Average time for a cancel: " << cancelTotalTime_ / cancelCount_ * 1e9 << "ns {Total time spent: "
                   << cancelTotalTime_ << ", Count: " << cancelCount_ << "}\n";
-    if (modifyCount_ > 0) {
-        std::cout << "Average time for a modification: " << modifyTotalTime_ / modifyCount_ * 1e9 << "ns {Total time spent: "
-                  << modifyTotalTime_ << ", Count: " << modifyCount_ << "}\n";
-        std::cout << "Modification info: " << modifyWentThroughCount_ * 1.0 / modifyCount_ * 100
-                  << "% went through {Total time spent: " << modifyTotalTime_ << ", Count: " << modifyWentThroughCount_ << "}\n";
-    }
 #endif
 }
 
@@ -213,10 +207,8 @@ void Orderbook::addOrderInternal(Order order) {
         return;
     }
 
-    if (order.getType() == OrderType::FillOrKill) {
-        if (!canFullyFill(side, price, order.getRemainingQuantity())) {
-            return;
-        }
+    if (order.getType() == OrderType::FillOrKill && !canFullyFill(side, price, order.getRemainingQuantity())) {
+        return;
     }
 
     Orders &orders =
@@ -225,9 +217,9 @@ void Orderbook::addOrderInternal(Order order) {
     orders.push_back(order);
     auto iterator = std::prev(orders.end());
 
-    orders_.emplace(iterator->getId(), iterator);
+    orders_.emplace(order.getId(), iterator);
 
-    onOrderAdded(*iterator);
+    onOrderAdded(order);
 
     if (side == Side::Buy) bids_.onOrderAdded(price);
     else asks_.onOrderAdded(price);
@@ -261,12 +253,7 @@ bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) {
 
 
 void Orderbook::matchOrders() {
-    if (bids_.empty() || asks_.empty()) return;
-
-    while (true) {
-        if (bids_.empty() || asks_.empty()) {
-            break;
-        }
+    while (!bids_.empty() && !asks_.empty()) {
         auto [highestBid, bidOrders] = bids_.getBestOrders();
         auto [lowestAsk, askOrders] = asks_.getBestOrders();
 

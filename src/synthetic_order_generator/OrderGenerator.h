@@ -51,7 +51,7 @@ private:
 
     void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent> &out);
 
-    void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
+    [[maybe_unused]] void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
 
     Price getRandomOrderPrice(double mid, Side side);
 
