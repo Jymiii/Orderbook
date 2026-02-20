@@ -141,7 +141,7 @@ The `OrderGenerator` models mid-price evolution using geometric Brownian motion:
 mid(t+dt) = mid(t) * exp((drift - 0.5 * sigma^2) * dt + sigma * sqrt(dt) * Z)
 ```
 
-where `Z ~ N(0,1)`. Each tick produces a Poisson-distributed burst of events split roughly 50% adds, 45% cancels, and 5% modifies.
+where `Z ~ N(0,1)`. Each tick produces a Poisson-distributed burst of events split roughly 55% adds, 45% cancels.
 
 **Default MarketState parameters:**
 
