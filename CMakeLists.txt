@@ -18,7 +18,7 @@ add_library(orderbook_lib
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(ORDERBOOK_ENABLE_INSTRUMENTATION OFF CACHE BOOL "Enable per-operation timing counters" FORCE)
+set(ORDERBOOK_ENABLE_INSTRUMENTATION ON CACHE BOOL "Enable per-operation timing counters" FORCE)
 if (ORDERBOOK_ENABLE_INSTRUMENTATION)
     message(STATUS "Orderbook instrumentation: ON")
     target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)

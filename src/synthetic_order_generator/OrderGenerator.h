@@ -33,7 +33,7 @@ private:
 
 
     static constexpr int eventsPerTick = 10;
-    static constexpr std::array<double, 3> addCancelModOdds{50.0, 45.0, 5.0};
+    static constexpr std::array<double, 2> addCancelModOdds{55.0, 45.0};
 
     std::poisson_distribution<int> eventCountDist_{eventsPerTick};
     std::discrete_distribution<int> eventTypeDist_{
