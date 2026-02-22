@@ -35,35 +35,35 @@
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                        Orderbook                             │
-│  ┌─────────────────────┐     ┌─────────────────────────┐    │
-│  │  LevelArray<N,Buy>  │     │  LevelArray<N,Sell>     │    │
-│  │  (bids_)            │     │  (asks_)                │    │
-│  │                     │     │                         │    │
-│  │  [bestIdx_] ◄─ O(1) │     │  [bestIdx_] ◄─ O(1)    │    │
-│  │       ...           │     │       ...               │    │
-│  │  [worstIdx_]        │     │  [worstIdx_]            │    │
-│  └─────────────────────┘     └─────────────────────────┘    │
+│  ┌─────────────────────┐     ┌─────────────────────────┐     │
+│  │  LevelArray<N,Buy>  │     │  LevelArray<N,Sell>     │     │
+│  │  (bids_)            │     │  (asks_)                │     │
+│  │                     │     │                         │     │
+│  │  [bestIdx_] ◄─ O(1) │     │  [bestIdx_] ◄─ O(1)     │     │
+│  │       ...           │     │       ...               │     │
+│  │  [worstIdx_]        │     │  [worstIdx_]            │     │
+│  └─────────────────────┘     └─────────────────────────┘     │
 │                                                              │
 │  orders_: unordered_map<OrderId, list<Order>::iterator>      │
 │  trades_: vector<Trade>                                      │
 │                                                              │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  Background thread: GoodForDay pruning @ 16:30      │    │
-│  └─────────────────────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │  Background thread: GoodForDay pruning @ 16:30      │     │
+│  └─────────────────────────────────────────────────────┘     │
 └──────────────────────────────────────────────────────────────┘
                            ▲
                            │  addOrder / cancelOrder / modifyOrder
                            │
                ┌───────────┴────────────┐
-               │     OrderExecutor       │
-               │  (runs simulation or    │
-               │   replays from CSV)     │
+               │     OrderExecutor      │
+               │  (runs simulation or   │
+               │   replays from CSV)    │
                └───────────┬────────────┘
                            │
                ┌───────────┴────────────┐
-               │     OrderGenerator      │
-               │  (GBM price model +     │
-               │   Poisson event flow)   │
+               │     OrderGenerator     │
+               │  (GBM price model +    │
+               │   Poisson event flow)  │
                └────────────────────────┘
 ```
 
