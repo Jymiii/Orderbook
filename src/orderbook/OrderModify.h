@@ -13,7 +13,8 @@
 class OrderModify {
 public:
     OrderModify(OrderId id, Side side, Price price, Quantity quantity)
-            : id_{id}, side_{side}, price_{price}, quantity_{quantity} {}
+        : id_{id}, side_{side}, price_{price}, quantity_{quantity} {
+    }
 
     [[nodiscard]] OrderId getId() const {
         return id_;

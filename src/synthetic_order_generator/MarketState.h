@@ -4,6 +4,7 @@
 
 #ifndef ORDERBOOK_MARKETSTATE_H
 #define ORDERBOOK_MARKETSTATE_H
+
 struct MarketState {
     double mid = 100.0;
     double drift = 0.1;

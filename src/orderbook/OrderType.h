@@ -4,6 +4,7 @@
 
 #ifndef ORDERBOOK_ORDERTYPE_H
 #define ORDERBOOK_ORDERTYPE_H
+
 enum class OrderType {
     GoodTillCancel,
     FillAndKill,

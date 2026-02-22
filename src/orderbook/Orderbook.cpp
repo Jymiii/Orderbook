@@ -5,19 +5,20 @@
 #include "Orderbook.h"
 
 template<int N, Side S>
-void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levelArray) {
-    if (levelArray.empty()) return;
+void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
+    auto best = levels.getBestOrders();
+    if (!best) return;
 
-    [[maybe_unused]] auto [bestPrice, orders] = levelArray.getBestOrders();
+    auto &[bestPrice, ordersRef] = *best;
+    auto &orders = ordersRef.get();
 
-    auto &order = orders.front();
-    switch (order.getType()) {
-        case OrderType::FillAndKill:cancelOrderInternal(order.getId());
+    switch (auto &order = orders.front(); order.getType()) {
+        case OrderType::FillAndKill: cancelOrderInternal(order.getId());
             break;
 
-        case OrderType::FillOrKill:throw std::logic_error("There was a stale FOK order, should never be possible.");
+        case OrderType::FillOrKill: throw std::logic_error("There was a stale FOK order, should never be possible.");
 
-        default:break;
+        default: break;
     }
 }
 
@@ -66,8 +67,8 @@ bool Orderbook::waitTillPruneTime() {
         std::unique_lock<std::mutex> lock(orderMutex_);
 
         shutdownConditionVariable_.wait_for(
-                lock, until,
-                [&] { return shutdown_; }
+            lock, until,
+            [&] { return shutdown_; }
         );
 
         if (shutdown_) return true;
@@ -95,10 +96,10 @@ Orderbook::~Orderbook() {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     if (addCount_ > 0)
         std::cout << "Average time for an add: " << addTotalTime_ / addCount_ * 1e9 << "ns {Total time spent: "
-                  << addTotalTime_ << ", Count: " << addCount_ << "}\n";
+                << addTotalTime_ << ", Count: " << addCount_ << "}\n";
     if (cancelCount_ > 0)
         std::cout << "Average time for a cancel: " << cancelTotalTime_ / cancelCount_ * 1e9 << "ns {Total time spent: "
-                  << cancelTotalTime_ << ", Count: " << cancelCount_ << "}\n";
+                << cancelTotalTime_ << ", Count: " << cancelCount_ << "}\n";
 #endif
 }
 
@@ -110,7 +111,14 @@ Orderbook::~Orderbook() {
     return orders_.size();
 }
 
-void Orderbook::addOrder(Order order) {
+std::optional<double> Orderbook::getMidPrice() const {
+    const auto bestBid = bids_.getBestPrice();
+    const auto bestAsk = asks_.getBestPrice();
+    if (!bestBid && !bestAsk) return std::nullopt;
+    return (bestBid.value_or(bestAsk.value()) / 2.0 + bestAsk.value_or(bestBid.value()) / 2.0);
+}
+
+void Orderbook::addOrder(const Order &order) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addCount_++;
     timer_.start();
@@ -140,12 +148,12 @@ void Orderbook::modifyOrder(OrderModify orderModify) {
     timer_.start();
 #endif
     std::scoped_lock _{orderMutex_};
-    auto ordersIterator = orders_.find(orderModify.getId());
+    const auto ordersIterator = orders_.find(orderModify.getId());
     if (ordersIterator == orders_.end()) return;
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyWentThroughCount_++;
 #endif
-    OrderType type{ordersIterator->second->getType()};
+    const OrderType type{ordersIterator->second->getType()};
     cancelOrderInternal(orderModify.getId());
     addOrderInternal(orderModify.toOrder(type));
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
@@ -158,7 +166,7 @@ void Orderbook::modifyOrder(OrderModify orderModify) {
 void Orderbook::cancelOrders(const OrderIds &orderIds) {
     std::scoped_lock _{orderMutex_};
 
-    for (OrderId id: orderIds) {
+    for (const OrderId id: orderIds) {
         cancelOrderInternal(id);
     }
 }
@@ -167,7 +175,7 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     auto it = orders_.find(orderId);
     if (it == orders_.end()) [[unlikely]] return;
 
-    auto listIt = it->second;
+    const auto listIt = it->second;
 
     onOrderCanceled(*listIt);
 
@@ -175,10 +183,14 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     const Side side = listIt->getSide();
 
     if (side == Side::Buy) {
-        bids_.getOrders(price).erase(listIt);
+        auto ordersOpt = bids_.getOrders(price);
+        assert(ordersOpt && "Cancel: price must be in range");
+        ordersOpt->get().erase(listIt);
         bids_.onOrderRemoved(price);
     } else {
-        asks_.getOrders(price).erase(listIt);
+        auto ordersOpt = asks_.getOrders(price);
+        assert(ordersOpt && "Cancel: price must be in range");
+        ordersOpt->get().erase(listIt);
         asks_.onOrderRemoved(price);
     }
     orders_.erase(it);
@@ -191,13 +203,15 @@ void Orderbook::addOrderInternal(Order order) {
 
     const Side side = order.getSide();
 
-    if (order.getType() == OrderType::Market) [[unlikely]] {
-        if (side == Side::Sell && !bids_.empty()) {
-            const Price worstBidPrice = bids_.getWorstPrice();
-            order.toFillAndKill(worstBidPrice);
-        } else if (side == Side::Buy && !asks_.empty()) {
-            const Price worstAskPrice = asks_.getWorstPrice();
-            order.toFillAndKill(worstAskPrice);
+    if (order.getType() == OrderType::Market) {
+        if (side == Side::Sell) {
+            const auto worstBidPrice = bids_.getWorstPrice();
+            if (!worstBidPrice) [[unlikely]] return;
+            order.toFillAndKill(*worstBidPrice);
+        } else if (side == Side::Buy) {
+            const auto worstAskPrice = asks_.getWorstPrice();
+            if (!worstAskPrice) [[unlikely]] return;
+            order.toFillAndKill(*worstAskPrice);
         } else return;
     }
 
@@ -211,8 +225,10 @@ void Orderbook::addOrderInternal(Order order) {
         return;
     }
 
-    Orders &orders =
-            (side == Side::Buy) ? bids_.getOrders(price) : asks_.getOrders(price);
+    const auto ordersOpt = (side == Side::Buy) ? bids_.getOrders(price) : asks_.getOrders(price);
+    if (!ordersOpt) [[unlikely]] return;
+
+    Orders &orders = ordersOpt->get();
 
     orders.push_back(order);
     auto iterator = std::prev(orders.end());
@@ -233,17 +249,17 @@ bool Orderbook::canMatch(Side side, Price price) {
     if (price == Constants::INVALID_PRICE) return true;
 
     if (side == Side::Sell) {
-        if (bids_.empty()) return false;
-        const auto &[highestBid, _] = bids_.getBestOrders();
-        return highestBid >= price;
+        const auto best = bids_.getBestOrders();
+        if (!best) return false;
+        return best->first >= price;
     } else {
-        if (asks_.empty()) return false;
-        const auto &[lowestAsk, _] = asks_.getBestOrders();
-        return lowestAsk <= price;
+        const auto best = asks_.getBestOrders();
+        if (!best) return false;
+        return best->first <= price;
     }
 }
 
-bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) {
+bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) const {
     if (side == Side::Sell) {
         return bids_.canFullyFill(price, quantity);
     } else {
@@ -253,9 +269,15 @@ bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) {
 
 
 void Orderbook::matchOrders() {
-    while (!bids_.empty() && !asks_.empty()) {
-        auto [highestBid, bidOrders] = bids_.getBestOrders();
-        auto [lowestAsk, askOrders] = asks_.getBestOrders();
+    while (true) {
+        auto bestBid = bids_.getBestOrders();
+        auto bestAsk = asks_.getBestOrders();
+        if (!bestBid || !bestAsk) break;
+
+        auto [highestBid, bidOrdersRef] = *bestBid;
+        auto [lowestAsk, askOrdersRef] = *bestAsk;
+        auto &bidOrders = bidOrdersRef.get();
+        auto &askOrders = askOrdersRef.get();
 
         if (highestBid < lowestAsk) break;
 
@@ -271,9 +293,9 @@ void Orderbook::matchOrders() {
             const Price askOrderPrice = askOrder.getPrice();
             const Price bidOrderPrice = bidOrder.getPrice();
             trades_.emplace_back(
-                    bidOrder.getId(), askOrder.getId(),
-                    bidOrderPrice, askOrderPrice,
-                    tradedQuantity);
+                bidOrder.getId(), askOrder.getId(),
+                bidOrderPrice, askOrderPrice,
+                tradedQuantity);
 
             const bool bidFilled = bidOrder.isFilled();
             const bool askFilled = askOrder.isFilled();
@@ -306,8 +328,8 @@ void Orderbook::matchOrders() {
 
     auto createLevelInfo = [](Price price, const Orders &orders) {
         const Quantity total = std::accumulate(
-                orders.begin(), orders.end(), Quantity{0},
-                [](Quantity q, const Order &o) { return q + o.getRemainingQuantity(); }
+            orders.begin(), orders.end(), Quantity{0},
+            [](Quantity q, const Order &o) { return q + o.getRemainingQuantity(); }
         );
         return LevelInfo{price, total};
     };
@@ -343,14 +365,16 @@ void Orderbook::onOrderCanceled(const Order &order) {
 }
 
 void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Action action, Side side) {
-    LevelData &data = (side == Side::Buy) ? bids_.getLevelData(price) : asks_.getLevelData(price);
+    auto dataOpt = (side == Side::Buy) ? bids_.getLevelData(price) : asks_.getLevelData(price);
+    assert(dataOpt && "updateLevelData: price must be in range");
+    auto &[remainingQuantity, count] = dataOpt->get();
 
-    if (action == LevelData::Action::Add) data.count++;
-    else if (action == LevelData::Action::Remove) data.count--;
+    if (action == LevelData::Action::Add) count++;
+    else if (action == LevelData::Action::Remove) count--;
 
     if (action == LevelData::Action::Remove || action == LevelData::Action::Match) {
-        data.quantity -= quantity;
+        remainingQuantity -= quantity;
     } else {
-        data.quantity += quantity;
+        remainingQuantity += quantity;
     }
 }

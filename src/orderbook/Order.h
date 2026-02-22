@@ -16,10 +16,12 @@
 class Order {
 public:
     Order(OrderId id, OrderType type, Side side, Price price, Quantity quantity)
-            : id_{id}, type_{type}, side_{side}, price_{price}, remainingQuantity_{quantity} {}
+        : id_{id}, type_{type}, side_{side}, price_{price}, remainingQuantity_{quantity} {
+    }
 
-    Order(OrderId id, Side side, Quantity quantity) :
-            Order(id, OrderType::Market, side, Constants::INVALID_PRICE, quantity) {}
+    Order(OrderId id, Side side, Quantity quantity) : Order(id, OrderType::Market, side, Constants::INVALID_PRICE,
+                                                            quantity) {
+    }
 
     [[nodiscard]] OrderId getId() const {
         return id_;
@@ -62,7 +64,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const Order &order) {
         return os << order.id_ << "," << std::to_underlying(order.type_) << "," << std::to_underlying(order.side_)
-                  << "," << order.price_ << "," << order.remainingQuantity_ << "\n";
+               << "," << order.price_ << "," << order.remainingQuantity_ << "\n";
     }
 
 private:

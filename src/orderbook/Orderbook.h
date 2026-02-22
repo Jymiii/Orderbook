@@ -11,10 +11,6 @@
 #include "OrderModify.h"
 #include "OrderbookLevelInfos.h"
 #include "LevelArray.h"
-#include <numeric>
-#include <iostream>
-#include <chrono>
-#include <ctime>
 #include <thread>
 #include <mutex>
 
@@ -81,17 +77,19 @@ public:
 
     ~Orderbook();
 
-    void addOrder(Order order);
+    void addOrder(const Order &order);
 
     void modifyOrder(OrderModify orderModify);
 
     void cancelOrder(OrderId orderId);
 
+    std::optional<double> getMidPrice() const;
+
     [[nodiscard]] std::size_t size() const;
 
     [[nodiscard]] OrderbookLevelInfos getOrderInfos() const;
 
-    [[nodiscard]] bool canFullyFill(Side side, Price price, Quantity quantity);
+    [[nodiscard]] bool canFullyFill(Side side, Price price, Quantity quantity) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Orderbook &ob) {
         return os << ob.getOrderInfos();

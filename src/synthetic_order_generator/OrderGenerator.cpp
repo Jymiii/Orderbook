@@ -66,7 +66,6 @@ std::vector<OrderEvent> OrderGenerator::generate() {
         for (const auto &event: eventBucket) {
             orders.push_back(event);
         }
-
     }
     return orders;
 }
@@ -84,8 +83,8 @@ void OrderGenerator::generateAddOrderEvents(double mid, int addCount, std::vecto
 
         auto newOrder{Order{nextId_++, type, side, px, getRandomQuantity()}};
         out.emplace_back(
-                EventType::New,
-                newOrder
+            EventType::New,
+            newOrder
         );
         registry_.onNew(newOrder);
     }
@@ -104,7 +103,8 @@ void OrderGenerator::generateCancelOrderEvents(int cancelCount, std::vector<Orde
     }
 }
 
-[[maybe_unused]] void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out) {
+[[maybe_unused]] void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount,
+                                                                std::vector<OrderEvent> &out) {
     if (modifyCount <= 0) return;
 
     out.reserve(out.size() + static_cast<size_t>(modifyCount));
@@ -129,8 +129,8 @@ void OrderGenerator::generateCancelOrderEvents(int cancelCount, std::vector<Orde
 
         auto modify{OrderModify{order->getId(), side, price, quantity}};
         out.emplace_back(
-                EventType::Modify,
-                modify
+            EventType::Modify,
+            modify
         );
         registry_.onModify(modify);
     }

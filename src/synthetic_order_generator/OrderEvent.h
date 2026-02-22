@@ -12,9 +12,10 @@
 
 
 template<class... Ts>
-struct Overloaded : Ts ... {
+struct Overloaded : Ts... {
     using Ts::operator()...;
 };
+
 template<class... Ts>
 Overloaded(Ts...) -> Overloaded<Ts...>;
 
@@ -35,37 +36,37 @@ struct OrderEvent {
 
     static OrderEvent Cancel(OrderId id) { return {EventType::Cancel, id}; }
 
-    OrderEvent(EventType t, Payload p) : event_(t), payload(std::move(p)) {}
+    OrderEvent(EventType t, Payload p) : event_(t), payload(std::move(p)) {
+    }
 
     friend std::ostream &operator<<(std::ostream &os, const OrderEvent &e) {
         std::visit(Overloaded{
-                [&](Order const &o) {
-                    os << std::to_underlying(EventType::New)
-                       << "," << o.getId()
-                       << "," << std::to_underlying(o.getType())
-                       << "," << std::to_underlying(o.getSide())
-                       << "," << o.getPrice()
-                       << "," << o.getRemainingQuantity()
-                       << "\n";
-                },
-                [&](OrderModify const &m) {
-                    os << std::to_underlying(EventType::Modify)
-                       << "," << m.getId()
-                       << "," << std::to_underlying(m.getSide())
-                       << "," << m.getPrice()
-                       << "," << m.getQuantity()
-                       << "\n";
-                },
-                [&](OrderId const &id) {
-                    os << std::to_underlying(EventType::Cancel)
-                       << "," << id
-                       << "\n";
-                }
-        }, e.payload);
+                       [&](Order const &o) {
+                           os << std::to_underlying(EventType::New)
+                                   << "," << o.getId()
+                                   << "," << std::to_underlying(o.getType())
+                                   << "," << std::to_underlying(o.getSide())
+                                   << "," << o.getPrice()
+                                   << "," << o.getRemainingQuantity()
+                                   << "\n";
+                       },
+                       [&](OrderModify const &m) {
+                           os << std::to_underlying(EventType::Modify)
+                                   << "," << m.getId()
+                                   << "," << std::to_underlying(m.getSide())
+                                   << "," << m.getPrice()
+                                   << "," << m.getQuantity()
+                                   << "\n";
+                       },
+                       [&](OrderId const &id) {
+                           os << std::to_underlying(EventType::Cancel)
+                                   << "," << id
+                                   << "\n";
+                       }
+                   }, e.payload);
 
         return os;
     }
-
 };
 
 #endif //ORDERBOOK_ORDEREVENT_H

@@ -8,7 +8,8 @@
 #include <utility>
 
 OrderExecutor::OrderExecutor(MarketState state, size_t ticks, std::string persist_path)
-        : generator_{state, ticks}, persist_path_{std::move(persist_path)} {}
+    : generator_{state, ticks}, persist_path_{std::move(persist_path)} {
+}
 
 double OrderExecutor::run(const std::string &csv_path) {
     if (csv_path.empty()) {
@@ -27,16 +28,16 @@ double OrderExecutor::executeOrders(std::vector<OrderEvent> &events) {
 
     for (const auto &e: events) {
         std::visit(Overloaded{
-                [&](Order const &o) {
-                    orderbook_.addOrder(o);
-                },
-                [&](OrderModify const &m) {
-                    orderbook_.modifyOrder(m);
-                },
-                [&](OrderId const &id) {
-                    orderbook_.cancelOrder(id);
-                }
-        }, e.payload);
+                       [&](Order const &o) {
+                           orderbook_.addOrder(o);
+                       },
+                       [&](OrderModify const &m) {
+                           orderbook_.modifyOrder(m);
+                       },
+                       [&](OrderId const &id) {
+                           orderbook_.cancelOrder(id);
+                       }
+                   }, e.payload);
     }
 
     return timer.elapsed();
@@ -51,16 +52,16 @@ double OrderExecutor::executeOrdersPersist(std::vector<OrderEvent> &events) {
     }
     for (const auto &e: events) {
         std::visit(Overloaded{
-                [&](Order const &o) {
-                    orderbook_.addOrder(o);
-                },
-                [&](OrderModify const &m) {
-                    orderbook_.modifyOrder(m);
-                },
-                [&](OrderId const &id) {
-                    orderbook_.cancelOrder(id);
-                }
-        }, e.payload);
+                       [&](Order const &o) {
+                           orderbook_.addOrder(o);
+                       },
+                       [&](OrderModify const &m) {
+                           orderbook_.modifyOrder(m);
+                       },
+                       [&](OrderId const &id) {
+                           orderbook_.cancelOrder(id);
+                       }
+                   }, e.payload);
 
         file << e;
     }
@@ -99,22 +100,24 @@ std::vector<OrderEvent> OrderExecutor::getOrdersFromCsv(const std::string &path)
 
         if (action == static_cast<int>(EventType::New)) {
             events.emplace_back(EventType::New,
-                                Order{static_cast<OrderId>(std::stoll(members[1])),
-                                      static_cast<OrderType>(std::stoi(members[2])),
-                                      static_cast<Side>(std::stoi(members[3])),
-                                      static_cast<Price>(std::stoll(members[4])),
-                                      static_cast<Quantity>(std::stoll(members[5]))});
+                                Order{
+                                    static_cast<OrderId>(std::stoll(members[1])),
+                                    static_cast<OrderType>(std::stoi(members[2])),
+                                    static_cast<Side>(std::stoi(members[3])),
+                                    static_cast<Price>(std::stoll(members[4])),
+                                    static_cast<Quantity>(std::stoll(members[5]))
+                                });
         } else if (action == static_cast<int>(EventType::Modify)) {
             events.emplace_back(EventType::Modify,
-                                OrderModify{static_cast<OrderId>(std::stoll(members[1])),
-                                            static_cast<Side>(std::stoi(members[2])),
-                                            static_cast<Price>(std::stoll(members[3])),
-                                            static_cast<Quantity>(std::stoll(members[4]))});
+                                OrderModify{
+                                    static_cast<OrderId>(std::stoll(members[1])),
+                                    static_cast<Side>(std::stoi(members[2])),
+                                    static_cast<Price>(std::stoll(members[3])),
+                                    static_cast<Quantity>(std::stoll(members[4]))
+                                });
         } else if (action == static_cast<int>(EventType::Cancel)) {
             events.push_back(OrderEvent::Cancel(static_cast<OrderId>(std::stoll(members[1]))));
         }
     }
     return events;
 }
-
-

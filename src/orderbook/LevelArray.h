@@ -6,8 +6,9 @@
 
 #include <array>
 #include <cassert>
-#include <stdexcept>
+#include <functional>
 #include <utility>
+#include <optional>
 
 template<Side S>
 struct BestScanPolicy;
@@ -45,56 +46,70 @@ public:
 
     LevelArray &operator=(const LevelArray &) = delete;
 
-    Orders &getOrders(Price price) {
+    std::optional<std::reference_wrapper<Orders> > getOrders(Price price) {
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) [[unlikely]] throw std::logic_error("Didn't resize in time");
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
+        if (idx < 0 || idx >= N) [[unlikely]] return std::nullopt;
         return levels_[idx].orders;
     }
 
-    [[nodiscard]] const Orders &getOrders(Price price) const {
+    [[nodiscard]] std::optional<std::reference_wrapper<const Orders> > getOrders(Price price) const {
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) [[unlikely]] throw std::logic_error("Didn't resize in time");
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
+        if (idx < 0 || idx >= N) [[unlikely]] return std::nullopt;
         return levels_[idx].orders;
     }
 
-    LevelData &getLevelData(Price price) {
-        return levels_[priceToIndex(price)].data;
+    std::optional<std::reference_wrapper<LevelData> > getLevelData(Price price) {
+        const int idx = priceToIndex(price);
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
+        if (idx < 0 || idx >= N) [[unlikely]] return std::nullopt;
+        return levels_[idx].data;
     }
 
-    [[nodiscard]] const LevelData &getLevelData(Price price) const {
-        return levels_[priceToIndex(price)].data;
+    [[nodiscard]] std::optional<std::reference_wrapper<const LevelData> > getLevelData(Price price) const {
+        const int idx = priceToIndex(price);
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
+        if (idx < 0 || idx >= N) [[unlikely]] return std::nullopt;
+        return levels_[idx].data;
     }
 
-    std::pair<Price, Orders &> getBestOrders() {
-        if (empty_) [[unlikely]] throw std::logic_error("side empty");
+    std::optional<std::pair<Price, std::reference_wrapper<Orders> > > getBestOrders() {
+        if (empty_) [[unlikely]] return std::nullopt;
         assert(bestIdx_ >= 0 && bestIdx_ < N);
-        return {indexToPrice(bestIdx_), levels_[bestIdx_].orders};
+        return std::pair<Price, std::reference_wrapper<Orders> >{indexToPrice(bestIdx_), levels_[bestIdx_].orders};
     }
 
-    [[nodiscard]] std::pair<Price, const Orders &> getBestOrders() const {
-        if (empty_) [[unlikely]] throw std::logic_error("side empty");
+    [[nodiscard]] std::optional<std::pair<Price, std::reference_wrapper<const Orders> > > getBestOrders() const {
+        if (empty_) [[unlikely]] return std::nullopt;
         assert(bestIdx_ >= 0 && bestIdx_ < N);
-        return {indexToPrice(bestIdx_), levels_[bestIdx_].orders};
+        return std::pair<Price, std::reference_wrapper<const Orders> >{
+            indexToPrice(bestIdx_), levels_[bestIdx_].orders
+        };
     }
 
-    std::pair<Price, Orders &> getWorstOrders() {
-        if (empty_) [[unlikely]] throw std::logic_error("side empty");
+    [[nodiscard]] std::optional<Price> getBestPrice() const noexcept {
+        if (empty_) [[unlikely]] return std::nullopt;
+        assert(bestIdx_ >= 0 && bestIdx_ < N);
+        return indexToPrice(bestIdx_);
+    }
+
+    std::optional<std::pair<Price, std::reference_wrapper<Orders> > > getWorstOrders() {
+        if (empty_) [[unlikely]] return std::nullopt;
         assert(worstIdx_ >= 0 && worstIdx_ < N);
-        return {indexToPrice(worstIdx_), levels_[worstIdx_].orders};
+        return std::pair<Price, std::reference_wrapper<Orders> >{indexToPrice(worstIdx_), levels_[worstIdx_].orders};
     }
 
-    [[nodiscard]] std::pair<Price, const Orders &> getWorstOrders() const {
-        if (empty_) [[unlikely]] throw std::logic_error("side empty");
+    [[nodiscard]] std::optional<std::pair<Price, std::reference_wrapper<const Orders> > > getWorstOrders() const {
+        if (empty_) [[unlikely]] return std::nullopt;
         assert(worstIdx_ >= 0 && worstIdx_ < N);
-        return {indexToPrice(worstIdx_), levels_[worstIdx_].orders};
+        return std::pair<Price, std::reference_wrapper<const Orders> >{
+            indexToPrice(worstIdx_), levels_[worstIdx_].orders
+        };
     }
 
-    [[nodiscard]] Price getBestPrice() const noexcept {
-        return empty_ ? Price{} : indexToPrice(bestIdx_);
-    }
-
-    [[nodiscard]] Price getWorstPrice() const {
-        if (empty_) [[unlikely]] throw std::logic_error("side empty");
+    [[nodiscard]] std::optional<Price> getWorstPrice() const noexcept {
+        if (empty_) [[unlikely]] return std::nullopt;
         return indexToPrice(worstIdx_);
     }
 
@@ -102,7 +117,7 @@ public:
 
     void onOrderAdded(Price price) {
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) [[unlikely]] throw std::logic_error("Didn't resize in time");
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
 
         if (empty_) {
             bestIdx_ = worstIdx_ = idx;
@@ -118,7 +133,7 @@ public:
         if (empty_) return;
 
         const int idx = priceToIndex(price);
-        if (idx < 0 || idx >= N) [[unlikely]] throw std::logic_error("Didn't resize in time");
+        assert(idx >= 0 && idx < N && "Price out of LevelArray range");
 
         const bool removedBest = (idx == bestIdx_);
         const bool removedWorst = (idx == worstIdx_);

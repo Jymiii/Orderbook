@@ -14,6 +14,7 @@ namespace Constants {
         int minute;
         int second;
     };
+
     auto constexpr inline INVALID_PRICE = std::numeric_limits<Price>::min();
     auto constexpr inline TICK_MULTIPLIER = 100;
     size_t constexpr inline LEVELARRAY_SIZE = 60000;

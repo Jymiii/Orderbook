@@ -16,7 +16,8 @@ class OrderGenerator {
 public:
     std::vector<OrderEvent> generate();
 
-    OrderGenerator(MarketState state, size_t ticks) : state_{state}, ticks_{ticks} {}
+    OrderGenerator(MarketState state, size_t ticks) : state_{state}, ticks_{ticks} {
+    }
 
 private:
     OrderId nextId_{0};
@@ -37,8 +38,8 @@ private:
 
     std::poisson_distribution<int> eventCountDist_{eventsPerTick};
     std::discrete_distribution<int> eventTypeDist_{
-            addCancelModOdds.begin(),
-            addCancelModOdds.end()
+        addCancelModOdds.begin(),
+        addCancelModOdds.end()
     };
 
     double getRandom() { return normalDist_(rng_); }
@@ -61,4 +62,3 @@ private:
 };
 
 #endif // ORDERBOOK_ORDERGENERATOR_H
-

@@ -10,8 +10,9 @@
 class Trade {
 public:
     Trade(OrderId bidId, OrderId askId, Price bidPrice, Price askPrice, Quantity quantity)
-            : bidId_{bidId}, askId_{askId}, bidPrice_{bidPrice}, askPrice_{askPrice},
-              quantity_{quantity} {}
+        : bidId_{bidId}, askId_{askId}, bidPrice_{bidPrice}, askPrice_{askPrice},
+          quantity_{quantity} {
+    }
 
     [[nodiscard]] OrderId getBidId() const {
         return bidId_;

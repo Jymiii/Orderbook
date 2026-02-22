@@ -11,8 +11,8 @@
 class OrderbookLevelInfos {
 public:
     OrderbookLevelInfos(LevelInfos bids, LevelInfos asks)
-            :
-            bids_{std::move(bids)}, asks_{std::move(asks)} {}
+        : bids_{std::move(bids)}, asks_{std::move(asks)} {
+    }
 
     [[nodiscard]] const LevelInfos &getBids() const { return bids_; }
 
