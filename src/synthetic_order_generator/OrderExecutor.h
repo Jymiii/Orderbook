@@ -17,22 +17,23 @@ public:
 
     double run(const std::string &csv_path = "");
 
-    Orderbook &getOrderbook();
+    const std::unique_ptr<Orderbook>& getOrderbook();
 
 private:
-    Orderbook orderbook_{true};
+    std::unique_ptr<Orderbook> orderbook_ = std::make_unique<Orderbook>(true);
     OrderGenerator generator_{MarketState{}, 100000};
     std::string persist_path_{};
 
-    double runFromCsv(const std::string &csv_path);
-
     static std::vector<OrderEvent> getOrdersFromCsv(const std::string &path);
 
-    double executeOrders(std::vector<OrderEvent> &orders);
-
-    double executeOrdersPersist(std::vector<OrderEvent> &orders);
-
     double runFromSimulation();
+
+    [[nodiscard]] double executeOrders(const std::vector<OrderEvent> &events) const;
+
+    [[nodiscard]] double executeOrdersPersist(const std::vector<OrderEvent> &events) const;
+
+    [[nodiscard]] double runFromCsv(const std::string &csv_path) const;
+
 };
 
 #endif // ORDERBOOK_ORDEREXECUTOR_H

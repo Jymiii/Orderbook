@@ -19,23 +19,23 @@ double OrderExecutor::run(const std::string &csv_path) {
     }
 }
 
-Orderbook &OrderExecutor::getOrderbook() {
+const std::unique_ptr<Orderbook>& OrderExecutor::getOrderbook() {
     return orderbook_;
 }
 
-double OrderExecutor::executeOrders(std::vector<OrderEvent> &events) {
-    Timer timer;
+double OrderExecutor::executeOrders(const std::vector<OrderEvent> &events) const {
+    const Timer timer;
 
     for (const auto &e: events) {
         std::visit(Overloaded{
                        [&](Order const &o) {
-                           orderbook_.addOrder(o);
+                           orderbook_->addOrder(o);
                        },
                        [&](OrderModify const &m) {
-                           orderbook_.modifyOrder(m);
+                           orderbook_->modifyOrder(m);
                        },
                        [&](OrderId const &id) {
-                           orderbook_.cancelOrder(id);
+                           orderbook_->cancelOrder(id);
                        }
                    }, e.payload);
     }
@@ -44,8 +44,8 @@ double OrderExecutor::executeOrders(std::vector<OrderEvent> &events) {
 }
 
 
-double OrderExecutor::executeOrdersPersist(std::vector<OrderEvent> &events) {
-    Timer timer;
+double OrderExecutor::executeOrdersPersist(const std::vector<OrderEvent> &events) const {
+    const Timer timer;
     std::ofstream file(persist_path_, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open persist file: " + persist_path_);
@@ -53,31 +53,31 @@ double OrderExecutor::executeOrdersPersist(std::vector<OrderEvent> &events) {
     for (const auto &e: events) {
         std::visit(Overloaded{
                        [&](Order const &o) {
-                           orderbook_.addOrder(o);
+                           orderbook_->addOrder(o);
                        },
                        [&](OrderModify const &m) {
-                           orderbook_.modifyOrder(m);
+                           orderbook_->modifyOrder(m);
                        },
                        [&](OrderId const &id) {
-                           orderbook_.cancelOrder(id);
+                           orderbook_->cancelOrder(id);
                        }
                    }, e.payload);
 
         file << e;
     }
     file.flush();
-    auto duration = timer.elapsed();
+    const auto duration = timer.elapsed();
     return duration;
 }
 
 double OrderExecutor::runFromSimulation() {
-    std::vector<OrderEvent> events = generator_.generate();
+    const std::vector<OrderEvent> events = generator_.generate();
     if (persist_path_.empty()) return executeOrders(events);
     else return executeOrdersPersist(events);
 }
 
-double OrderExecutor::runFromCsv(const std::string &csv_path) {
-    std::vector<OrderEvent> orders = getOrdersFromCsv(csv_path);
+double OrderExecutor::runFromCsv(const std::string &csv_path) const {
+    const std::vector<OrderEvent> orders = getOrdersFromCsv(csv_path);
     return executeOrders(orders);
 }
 
