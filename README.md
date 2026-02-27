@@ -156,14 +156,6 @@ With N = 60,000 and prices stored as integer ticks:
 Price range covered: **$0.00 – $600.00**  
 (at `TICK_MULTIPLIER = 100`)
 
-Mathematically:
-
-$$
-\text{Index} = \mathrm{Price}_{\mathrm{ticks}}
-\qquad\Longleftrightarrow\qquad
-\mathrm{Price}_{\mathrm{dollars}} = \frac{\text{Index}}{\text{TICK\_MULTIPLIER}}
-$$
-
 ---
 
 ## Synthetic Order Generator
