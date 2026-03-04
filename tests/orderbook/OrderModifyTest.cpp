@@ -2,6 +2,7 @@
 // Created by Jimi van der Meer on 11/02/2026.
 //
 #include "TestHelpers.h"
+#include "gtest/gtest.h"
 
 TEST(OrderModify, StoresFieldsAndConvertsToOrder) {
     constexpr OrderId id = 42;

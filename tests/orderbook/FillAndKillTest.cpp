@@ -2,6 +2,7 @@
 // Created by Jimi van der Meer on 12/02/2026.
 //
 #include "TestHelpers.h"
+#include "gtest/gtest.h"
 
 TEST(FillAndKill, NoCounterParty) {
     OrderFactory f;

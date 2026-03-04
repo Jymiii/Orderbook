@@ -3,6 +3,7 @@
 //
 
 #include "TestHelpers.h"
+#include "gtest/gtest.h"
 
 TEST(FillOrKill, NoCounterParty) {
     OrderFactory f;

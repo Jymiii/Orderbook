@@ -3,6 +3,7 @@
 //
 
 #include "Orderbook.h"
+#include "shared/TimeUtil.h"
 
 template<int N, Side S>
 void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
@@ -47,10 +48,12 @@ bool Orderbook::waitTillPruneTime() {
     using namespace std::chrono;
 
     auto now = system_clock::now();
-    std::time_t t = system_clock::to_time_t(now);
+    const std::time_t t = system_clock::to_time_t(now);
 
     std::tm tm{};
-    localtime_r(&t, &tm);
+    if (!safe_localtime(&t, &tm)) {
+        return false; // or handle error
+    }
 
     tm.tm_hour = Constants::MarketCloseTime.hour;
     tm.tm_min = Constants::MarketCloseTime.minute;
@@ -76,7 +79,9 @@ bool Orderbook::waitTillPruneTime() {
     return false;
 }
 
-Orderbook::Orderbook(bool startPruneThread) {
+Orderbook::Orderbook(bool startPruneThread)
+    : bids_(std::make_unique<LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy>>()),
+      asks_(std::make_unique<LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell>>()) {
     if (startPruneThread) {
         gfdPruneThread_ = std::thread([this] {
             pruneStaleGoodForDay();
@@ -112,8 +117,8 @@ Orderbook::~Orderbook() {
 }
 
 std::optional<double> Orderbook::getMidPrice() const {
-    const auto bestBid = bids_.getBestPrice();
-    const auto bestAsk = asks_.getBestPrice();
+    const auto bestBid = bids_->getBestPrice();
+    const auto bestAsk = asks_->getBestPrice();
     if (!bestBid && !bestAsk) return std::nullopt;
     return (bestBid.value_or(bestAsk.value()) / 2.0 + bestAsk.value_or(bestBid.value()) / 2.0);
 }
@@ -183,15 +188,15 @@ void Orderbook::cancelOrderInternal(OrderId orderId) {
     const Side side = listIt->getSide();
 
     if (side == Side::Buy) {
-        auto ordersOpt = bids_.getOrders(price);
+        auto ordersOpt = bids_->getOrders(price);
         assert(ordersOpt && "Cancel: price must be in range");
         ordersOpt->get().erase(listIt);
-        bids_.onOrderRemoved(price);
+        bids_->onOrderRemoved(price);
     } else {
-        auto ordersOpt = asks_.getOrders(price);
+        auto ordersOpt = asks_->getOrders(price);
         assert(ordersOpt && "Cancel: price must be in range");
         ordersOpt->get().erase(listIt);
-        asks_.onOrderRemoved(price);
+        asks_->onOrderRemoved(price);
     }
     orders_.erase(it);
 }
@@ -205,11 +210,11 @@ void Orderbook::addOrderInternal(Order order) {
 
     if (order.getType() == OrderType::Market) {
         if (side == Side::Sell) {
-            const auto worstBidPrice = bids_.getWorstPrice();
+            const auto worstBidPrice = bids_->getWorstPrice();
             if (!worstBidPrice) [[unlikely]] return;
             order.toFillAndKill(*worstBidPrice);
         } else if (side == Side::Buy) {
-            const auto worstAskPrice = asks_.getWorstPrice();
+            const auto worstAskPrice = asks_->getWorstPrice();
             if (!worstAskPrice) [[unlikely]] return;
             order.toFillAndKill(*worstAskPrice);
         } else return;
@@ -225,7 +230,7 @@ void Orderbook::addOrderInternal(Order order) {
         return;
     }
 
-    const auto ordersOpt = (side == Side::Buy) ? bids_.getOrders(price) : asks_.getOrders(price);
+    const auto ordersOpt = (side == Side::Buy) ? bids_->getOrders(price) : asks_->getOrders(price);
     if (!ordersOpt) [[unlikely]] return;
 
     Orders &orders = ordersOpt->get();
@@ -237,8 +242,8 @@ void Orderbook::addOrderInternal(Order order) {
 
     onOrderAdded(order);
 
-    if (side == Side::Buy) bids_.onOrderAdded(price);
-    else asks_.onOrderAdded(price);
+    if (side == Side::Buy) bids_->onOrderAdded(price);
+    else asks_->onOrderAdded(price);
 
     matchOrders();
 }
@@ -249,11 +254,11 @@ bool Orderbook::canMatch(Side side, Price price) {
     if (price == Constants::INVALID_PRICE) return true;
 
     if (side == Side::Sell) {
-        const auto best = bids_.getBestOrders();
+        const auto best = bids_->getBestOrders();
         if (!best) return false;
         return best->first >= price;
     } else {
-        const auto best = asks_.getBestOrders();
+        const auto best = asks_->getBestOrders();
         if (!best) return false;
         return best->first <= price;
     }
@@ -261,17 +266,17 @@ bool Orderbook::canMatch(Side side, Price price) {
 
 bool Orderbook::canFullyFill(Side side, Price price, Quantity quantity) const {
     if (side == Side::Sell) {
-        return bids_.canFullyFill(price, quantity);
+        return bids_->canFullyFill(price, quantity);
     } else {
-        return asks_.canFullyFill(price, quantity);
+        return asks_->canFullyFill(price, quantity);
     }
 }
 
 
 void Orderbook::matchOrders() {
     while (true) {
-        auto bestBid = bids_.getBestOrders();
-        auto bestAsk = asks_.getBestOrders();
+        auto bestBid = bids_->getBestOrders();
+        auto bestAsk = asks_->getBestOrders();
         if (!bestBid || !bestAsk) break;
 
         auto [highestBid, bidOrdersRef] = *bestBid;
@@ -306,17 +311,17 @@ void Orderbook::matchOrders() {
             if (bidFilled) {
                 orders_.erase(bidOrder.getId());
                 bidOrders.pop_front();
-                if (bidOrders.empty()) bids_.onOrderRemoved(bidOrderPrice);
+                if (bidOrders.empty()) bids_->onOrderRemoved(bidOrderPrice);
             }
             if (askFilled) {
                 orders_.erase(askOrder.getId());
                 askOrders.pop_front();
-                if (askOrders.empty()) asks_.onOrderRemoved(askOrderPrice);
+                if (askOrders.empty()) asks_->onOrderRemoved(askOrderPrice);
             }
         }
     }
-    pruneStaleFillOrKill(bids_);
-    pruneStaleFillOrKill(asks_);
+    pruneStaleFillOrKill(*bids_);
+    pruneStaleFillOrKill(*asks_);
 }
 
 // ===== Read-only views =====
@@ -334,11 +339,11 @@ void Orderbook::matchOrders() {
         return LevelInfo{price, total};
     };
 
-    bids_.forEachLevelBestToWorst([&](Price price, const Orders &orders) {
+    bids_->forEachLevelBestToWorst([&](Price price, const Orders &orders) {
         levelInfosBids.push_back(createLevelInfo(price, orders));
     });
 
-    asks_.forEachLevelBestToWorst([&](Price price, const Orders &orders) {
+    asks_->forEachLevelBestToWorst([&](Price price, const Orders &orders) {
         levelInfosAsks.push_back(createLevelInfo(price, orders));
     });
 
@@ -365,7 +370,7 @@ void Orderbook::onOrderCanceled(const Order &order) {
 }
 
 void Orderbook::updateLevelData(Price price, Quantity quantity, LevelData::Action action, Side side) {
-    auto dataOpt = (side == Side::Buy) ? bids_.getLevelData(price) : asks_.getLevelData(price);
+    auto dataOpt = (side == Side::Buy) ? bids_->getLevelData(price) : asks_->getLevelData(price);
     assert(dataOpt && "updateLevelData: price must be in range");
     auto &[remainingQuantity, count] = dataOpt->get();
 

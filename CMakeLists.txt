@@ -34,7 +34,8 @@ add_executable(Orderbook main.cpp
         src/synthetic_order_generator/OrderEvent.h
         src/synthetic_order_generator/OrderRegistry.h
         src/shared/Timer.h
-        src/synthetic_order_generator/OrderExecutor.cpp)
+        src/synthetic_order_generator/OrderExecutor.cpp
+        src/shared/TimeUtil.h)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
 enable_testing()
