@@ -1,6 +1,3 @@
-//
-// Created by Jimi van der Meer on 13/02/2026.
-//
 #include "OrderExecutor.h"
 
 #include <fstream>
@@ -43,7 +40,6 @@ double OrderExecutor::executeOrders(const std::vector<OrderEvent> &events) const
     return timer.elapsed();
 }
 
-
 double OrderExecutor::executeOrdersPersist(const std::vector<OrderEvent> &events) const {
     const Timer timer;
     std::ofstream file(persist_path_, std::ios::out | std::ios::trunc);
@@ -66,8 +62,7 @@ double OrderExecutor::executeOrdersPersist(const std::vector<OrderEvent> &events
         file << e;
     }
     file.flush();
-    const auto duration = timer.elapsed();
-    return duration;
+    return timer.elapsed();
 }
 
 double OrderExecutor::runFromSimulation() {

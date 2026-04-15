@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDERGENERATOR_H
-#define ORDERBOOK_ORDERGENERATOR_H
+#pragma once
 
 #include "OrderRegistry.h"
 #include "MarketState.h"
@@ -33,7 +28,6 @@ private:
     std::uniform_real_distribution<double> uniformZeroToOne_{0, 1};
     std::bernoulli_distribution bernoulliDist_{0.5};
 
-
     static constexpr int eventsPerTick = 10;
     static constexpr std::array<double, 2> addCancelModOdds{55.0, 45.0};
 
@@ -53,13 +47,9 @@ private:
 
     void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent> &out);
 
-    [[maybe_unused]] void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
-
     Price getRandomOrderPrice(double mid, Side side);
 
     Quantity getRandomQuantity();
 
     OrderType getRandomOrderType();
 };
-
-#endif // ORDERBOOK_ORDERGENERATOR_H

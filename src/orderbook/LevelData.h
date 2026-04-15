@@ -1,11 +1,6 @@
-//
-// Created by Jimi van der Meer on 16/02/2026.
-//
+#pragma once
 
-#ifndef ORDERBOOK_LEVELDATA_H
-#define ORDERBOOK_LEVELDATA_H
-
-#include "Usings.h"
+#include "Types.h"
 
 struct LevelData {
     Quantity quantity{};
@@ -17,4 +12,3 @@ struct LevelData {
         Match
     };
 };
-#endif //ORDERBOOK_LEVELDATA_H

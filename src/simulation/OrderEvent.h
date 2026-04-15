@@ -1,15 +1,10 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-#ifndef ORDERBOOK_ORDEREVENT_H
-#define ORDERBOOK_ORDEREVENT_H
+#pragma once
 
 #include <variant>
 #include <type_traits>
 #include <ostream>
 #include "orderbook/Order.h"
 #include "orderbook/OrderModify.h"
-
 
 template<class... Ts>
 struct Overloaded : Ts... {
@@ -29,7 +24,6 @@ struct OrderEvent {
     EventType event_{};
     Payload payload;
 
-    // Convenience constructors (so emplace_back is clean)
     static OrderEvent New(Order o) { return {EventType::New, std::move(o)}; }
 
     static OrderEvent Modify(OrderModify m) { return {EventType::Modify, std::move(m)}; }
@@ -68,5 +62,3 @@ struct OrderEvent {
         return os;
     }
 };
-
-#endif //ORDERBOOK_ORDEREVENT_H

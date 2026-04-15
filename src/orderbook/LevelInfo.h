@@ -1,11 +1,8 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
+#pragma once
 
-#ifndef ORDERBOOK_LEVELINFO_H
-#define ORDERBOOK_LEVELINFO_H
-
-#include "Usings.h"
+#include "Types.h"
+#include <ostream>
+#include <vector>
 
 struct LevelInfo {
     Price price;
@@ -25,5 +22,3 @@ inline std::ostream &operator<<(std::ostream &os, const LevelInfos &infos) {
     }
     return os;
 }
-
-#endif //ORDERBOOK_LEVELINFO_H

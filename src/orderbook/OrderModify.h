@@ -1,11 +1,6 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
+#pragma once
 
-#ifndef ORDERBOOK_ORDERMODIFY_H
-#define ORDERBOOK_ORDERMODIFY_H
-
-#include "Usings.h"
+#include "Types.h"
 #include "Side.h"
 #include "OrderType.h"
 #include "Order.h"
@@ -42,5 +37,3 @@ private:
     Price price_;
     Quantity quantity_;
 };
-
-#endif //ORDERBOOK_ORDERMODIFY_H

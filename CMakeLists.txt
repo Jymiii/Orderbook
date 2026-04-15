@@ -27,28 +27,28 @@ else()
 endif()
 
 add_executable(Orderbook main.cpp
-        src/synthetic_order_generator/OrderExecutor.h
-        src/synthetic_order_generator/OrderGenerator.cpp
-        src/synthetic_order_generator/OrderGenerator.h
-        src/synthetic_order_generator/MarketState.h
-        src/synthetic_order_generator/OrderEvent.h
-        src/synthetic_order_generator/OrderRegistry.h
-        src/shared/Timer.h
-        src/synthetic_order_generator/OrderExecutor.cpp
-        src/shared/TimeUtil.h)
+        src/simulation/OrderExecutor.h
+        src/simulation/OrderGenerator.cpp
+        src/simulation/OrderGenerator.h
+        src/simulation/MarketState.h
+        src/simulation/OrderEvent.h
+        src/simulation/OrderRegistry.h
+        src/utils/Timer.h
+        src/simulation/OrderExecutor.cpp
+        src/utils/TimeUtil.h)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
 enable_testing()
 
 add_executable(OrderbookTests
-        tests/orderbook/GoodTillCancelTest.cpp
-        tests/orderbook/OrderModifyTest.cpp
-        tests/orderbook/MarketOrderTest.cpp
-        tests/orderbook/TestHelpers.h
-        tests/orderbook/FillOrKillTest.cpp
-        tests/orderbook/FillAndKillTest.cpp
-        tests/orderbook/GoodForDayTest.cpp
-        tests/orderbook/AdditionalTests.cpp
+        tests/GoodTillCancelTest.cpp
+        tests/OrderModifyTest.cpp
+        tests/MarketOrderTest.cpp
+        tests/TestHelpers.h
+        tests/FillOrKillTest.cpp
+        tests/FillAndKillTest.cpp
+        tests/GoodForDayTest.cpp
+        tests/GuardsTest.cpp
 )
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
 

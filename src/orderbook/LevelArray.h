@@ -1,5 +1,4 @@
-#ifndef ORDERBOOK_LEVELARRAY_H
-#define ORDERBOOK_LEVELARRAY_H
+#pragma once
 
 #include "Side.h"
 #include "LevelData.h"
@@ -226,5 +225,3 @@ private:
     int worstIdx_{P::start(N)};
     bool empty_{true};
 };
-
-#endif //ORDERBOOK_LEVELARRAY_H

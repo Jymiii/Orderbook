@@ -1,11 +1,7 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
+#pragma once
 
-#ifndef ORDERBOOK_TRADE_H
-#define ORDERBOOK_TRADE_H
-
-#include "Usings.h"
+#include "Types.h"
+#include <vector>
 
 class Trade {
 public:
@@ -45,4 +41,3 @@ private:
 };
 
 using Trades = std::vector<Trade>;
-#endif //ORDERBOOK_TRADE_H

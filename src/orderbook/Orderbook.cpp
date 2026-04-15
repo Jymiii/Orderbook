@@ -1,9 +1,5 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
-
 #include "Orderbook.h"
-#include "shared/TimeUtil.h"
+#include "utils/TimeUtil.h"
 
 template<int N, Side S>
 void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
@@ -126,7 +122,7 @@ std::optional<double> Orderbook::getMidPrice() const {
 void Orderbook::addOrder(const Order &order) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
@@ -138,7 +134,7 @@ void Orderbook::addOrder(const Order &order) {
 void Orderbook::cancelOrder(OrderId orderId) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
@@ -150,7 +146,7 @@ void Orderbook::cancelOrder(OrderId orderId) {
 void Orderbook::modifyOrder(OrderModify orderModify) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     const auto ordersIterator = orders_.find(orderModify.getId());
