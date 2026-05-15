@@ -15,7 +15,6 @@ TEST(FillAndKill, NoCounterParty) {
     EXPECT_TRUE(info.getBids().empty());
     EXPECT_TRUE(info.getAsks().empty());
     EXPECT_TRUE(ob.getTrades().empty());
-    EXPECT_TRUE(ob.getTrades().empty());
 }
 
 TEST(FillAndKill, PartialFill_Simple) {
