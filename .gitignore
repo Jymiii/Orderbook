@@ -1,0 +1,17 @@
+# Build directories
+cmake-build-*/
+build/
+out/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local generated data
+data/orders.txt
