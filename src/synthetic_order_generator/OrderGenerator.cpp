@@ -37,6 +37,8 @@ std::vector<OrderEvent> OrderGenerator::generate() {
     std::vector<OrderEvent> orders;
     orders.reserve(ticks_);
 
+    std::vector<OrderEvent> eventBucket;
+
     for (size_t i = 0; i < ticks_; ++i) {
         mid = mid * std::exp((drift - 0.5 * std::pow(sigma, 2)) * dt
                              + std::sqrt(dt) * sigma * getRandom());
@@ -55,17 +57,15 @@ std::vector<OrderEvent> OrderGenerator::generate() {
             }
         }
 
-        std::vector<OrderEvent> eventBucket;
+        eventBucket.clear();
         eventBucket.reserve(addCount + cancelCount + modifyCount);
 
-        //Cancels/Modify first so we do not cancel orders in the same burst as we add them.
+        //Cancels first so we do not cancel orders in the same burst as we add them.
         generateCancelOrderEvents(cancelCount, eventBucket);
         generateAddOrderEvents(mid, addCount, eventBucket);
 
         std::shuffle(eventBucket.begin(), eventBucket.end(), rng_);
-        for (const auto &event: eventBucket) {
-            orders.push_back(event);
-        }
+        orders.insert(orders.end(), eventBucket.begin(), eventBucket.end());
     }
     return orders;
 }
