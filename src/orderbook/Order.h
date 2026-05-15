@@ -15,49 +15,49 @@
 
 class Order {
 public:
-    Order(OrderId id, OrderType type, Side side, Price price, Quantity quantity)
+    Order(OrderId id, OrderType type, Side side, Price price, Quantity quantity) noexcept
         : id_{id}, type_{type}, side_{side}, price_{price}, remainingQuantity_{quantity} {
     }
 
-    Order(OrderId id, Side side, Quantity quantity) : Order(id, OrderType::Market, side, Constants::INVALID_PRICE,
-                                                            quantity) {
+    Order(OrderId id, Side side, Quantity quantity) noexcept
+        : Order(id, OrderType::Market, side, Constants::INVALID_PRICE, quantity) {
     }
 
-    [[nodiscard]] OrderId getId() const {
+    [[nodiscard]] OrderId getId() const noexcept {
         return id_;
     }
 
-    [[nodiscard]] OrderType getType() const {
+    [[nodiscard]] OrderType getType() const noexcept {
         return type_;
     }
 
-    [[nodiscard]] Side getSide() const {
+    [[nodiscard]] Side getSide() const noexcept {
         return side_;
     }
 
-    [[nodiscard]] Price getPrice() const {
+    [[nodiscard]] Price getPrice() const noexcept {
         return price_;
     }
 
-    [[nodiscard]] Quantity getRemainingQuantity() const {
+    [[nodiscard]] Quantity getRemainingQuantity() const noexcept {
         return remainingQuantity_;
     }
 
-    [[nodiscard]] bool isFilled() const {
+    [[nodiscard]] bool isFilled() const noexcept {
         return getRemainingQuantity() == 0;
     }
 
-    void fill(Quantity quantity) {
+    void fill(Quantity quantity) noexcept {
         assert(quantity <= getRemainingQuantity());
         remainingQuantity_ -= quantity;
     }
 
-    void toGoodTillCancel(Price price) {
+    void toGoodTillCancel(Price price) noexcept {
         type_ = OrderType::GoodTillCancel;
         price_ = price;
     }
 
-    void toFillAndKill(Price price) {
+    void toFillAndKill(Price price) noexcept {
         type_ = OrderType::FillAndKill;
         price_ = price;
     }
