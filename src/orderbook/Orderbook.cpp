@@ -9,16 +9,19 @@ void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     auto best = levels.getBestOrders();
     if (!best) return;
 
-    auto &[bestPrice, ordersRef] = *best;
-    auto &orders = ordersRef.get();
+    auto &orders = best->second.get();
 
     switch (auto &order = orders.front(); order.getType()) {
-        case OrderType::FillAndKill: cancelOrderInternal(order.getId());
+        case OrderType::FillAndKill:
+            cancelOrderInternal(order.getId());
             break;
 
-        case OrderType::FillOrKill: throw std::logic_error("There was a stale FOK order, should never be possible.");
+        case OrderType::FillOrKill:
+            assert(false && "Stale FOK order at best level: invariant violated");
+            break;
 
-        default: break;
+        default:
+            break;
     }
 }
 
@@ -211,11 +214,11 @@ void Orderbook::addOrderInternal(Order order) {
             const auto worstBidPrice = bids_.getWorstPrice();
             if (!worstBidPrice) [[unlikely]] return;
             order.toFillAndKill(*worstBidPrice);
-        } else if (side == Side::Buy) {
+        } else {
             const auto worstAskPrice = asks_.getWorstPrice();
             if (!worstAskPrice) [[unlikely]] return;
             order.toFillAndKill(*worstAskPrice);
-        } else return;
+        }
     }
 
     const Price price = order.getPrice();
