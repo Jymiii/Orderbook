@@ -112,10 +112,13 @@ Orderbook::~Orderbook() {
 }
 
 std::optional<double> Orderbook::getMidPrice() const {
+    std::scoped_lock _{orderMutex_};
     const auto bestBid = bids_.getBestPrice();
     const auto bestAsk = asks_.getBestPrice();
-    if (!bestBid && !bestAsk) return std::nullopt;
-    return (bestBid.value_or(bestAsk.value()) / 2.0 + bestAsk.value_or(bestBid.value()) / 2.0);
+    if (bestBid && bestAsk) return (*bestBid + *bestAsk) / 2.0;
+    if (bestBid) return static_cast<double>(*bestBid);
+    if (bestAsk) return static_cast<double>(*bestAsk);
+    return std::nullopt;
 }
 
 void Orderbook::addOrder(const Order &order) {
