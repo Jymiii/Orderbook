@@ -3,8 +3,10 @@
 //
 #include "OrderExecutor.h"
 
+#include "shared/Timer.h"
+
 #include <fstream>
-#include <iostream>
+#include <stdexcept>
 #include <utility>
 
 OrderExecutor::OrderExecutor(MarketState state, size_t ticks, std::string persist_path)

@@ -4,9 +4,9 @@
 #ifndef ORDERBOOK_ORDEREVENT_H
 #define ORDERBOOK_ORDEREVENT_H
 
-#include <variant>
-#include <type_traits>
 #include <ostream>
+#include <utility>
+#include <variant>
 #include "orderbook/Order.h"
 #include "orderbook/OrderModify.h"
 

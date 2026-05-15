@@ -3,7 +3,6 @@
 
 #include "orderbook/Orderbook.h"
 #include "OrderGenerator.h"
-#include "shared/Timer.h"
 
 #include <cstddef>
 #include <string>
