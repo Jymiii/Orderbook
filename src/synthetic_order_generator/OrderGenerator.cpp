@@ -60,8 +60,9 @@ std::vector<OrderEvent> OrderGenerator::generate() {
         eventBucket.clear();
         eventBucket.reserve(addCount + cancelCount + modifyCount);
 
-        //Cancels first so we do not cancel orders in the same burst as we add them.
+        //Cancels/modifies first so they only touch orders from previous ticks.
         generateCancelOrderEvents(cancelCount, eventBucket);
+        generateModifyOrderEvents(mid, modifyCount, eventBucket);
         generateAddOrderEvents(mid, addCount, eventBucket);
 
         std::shuffle(eventBucket.begin(), eventBucket.end(), rng_);
@@ -103,8 +104,7 @@ void OrderGenerator::generateCancelOrderEvents(int cancelCount, std::vector<Orde
     }
 }
 
-[[maybe_unused]] void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount,
-                                                                std::vector<OrderEvent> &out) {
+void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out) {
     if (modifyCount <= 0) return;
 
     out.reserve(out.size() + static_cast<size_t>(modifyCount));
