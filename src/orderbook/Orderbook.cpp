@@ -145,7 +145,7 @@ void Orderbook::cancelOrder(OrderId orderId) {
 #endif
 }
 
-void Orderbook::modifyOrder(OrderModify orderModify) {
+void Orderbook::modifyOrder(const OrderModify &orderModify) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
     timer_.start();
