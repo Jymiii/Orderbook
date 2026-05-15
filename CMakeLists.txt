@@ -17,8 +17,9 @@ add_library(orderbook_lib
         src/orderbook/LevelData.h
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_options(orderbook_lib PRIVATE -Wall -Wextra -Wpedantic)
 
-set(ORDERBOOK_ENABLE_INSTRUMENTATION ON CACHE BOOL "Enable per-operation timing counters" FORCE)
+option(ORDERBOOK_ENABLE_INSTRUMENTATION "Enable per-operation timing counters" OFF)
 if (ORDERBOOK_ENABLE_INSTRUMENTATION)
     message(STATUS "Orderbook instrumentation: ON")
     target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)
@@ -26,15 +27,12 @@ else()
     message(STATUS "Orderbook instrumentation: OFF")
 endif()
 
-add_executable(Orderbook main.cpp
-        src/synthetic_order_generator/OrderExecutor.h
+add_executable(Orderbook
+        main.cpp
         src/synthetic_order_generator/OrderGenerator.cpp
-        src/synthetic_order_generator/OrderGenerator.h
-        src/synthetic_order_generator/MarketState.h
-        src/synthetic_order_generator/OrderEvent.h
-        src/synthetic_order_generator/OrderRegistry.h
-        src/shared/Timer.h
-        src/synthetic_order_generator/OrderExecutor.cpp)
+        src/synthetic_order_generator/OrderExecutor.cpp
+)
+target_compile_options(Orderbook PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
 enable_testing()
@@ -43,12 +41,12 @@ add_executable(OrderbookTests
         tests/orderbook/GoodTillCancelTest.cpp
         tests/orderbook/OrderModifyTest.cpp
         tests/orderbook/MarketOrderTest.cpp
-        tests/orderbook/TestHelpers.h
         tests/orderbook/FillOrKillTest.cpp
         tests/orderbook/FillAndKillTest.cpp
         tests/orderbook/GoodForDayTest.cpp
         tests/orderbook/AdditionalTests.cpp
 )
+target_compile_options(OrderbookTests PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
 
 include(GoogleTest)
