@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_MARKETSTATE_H
-#define ORDERBOOK_MARKETSTATE_H
+#pragma once
 
 struct MarketState {
     double mid = 100.0;
@@ -12,4 +7,3 @@ struct MarketState {
     double dt = 0.0001;
     double b = 0.001;
 };
-#endif //ORDERBOOK_MARKETSTATE_H

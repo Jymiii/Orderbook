@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_TIMER_H
-#define ORDERBOOK_TIMER_H
+#pragma once
 
 #include <chrono>
 
@@ -28,4 +23,3 @@ public:
     }
 };
 
-#endif //ORDERBOOK_TIMER_H

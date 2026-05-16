@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDERGENERATOR_H
-#define ORDERBOOK_ORDERGENERATOR_H
+#pragma once
 
 #include "OrderRegistry.h"
 #include "MarketState.h"
@@ -60,4 +55,3 @@ private:
     OrderType getRandomOrderType();
 };
 
-#endif // ORDERBOOK_ORDERGENERATOR_H

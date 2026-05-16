@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 16/02/2026.
-//
-
-#ifndef ORDERBOOK_LEVELDATA_H
-#define ORDERBOOK_LEVELDATA_H
+#pragma once
 
 #include "Usings.h"
 
@@ -17,4 +12,3 @@ struct LevelData {
         Match
     };
 };
-#endif //ORDERBOOK_LEVELDATA_H

@@ -1,5 +1,4 @@
-#ifndef ORDERBOOK_ORDEREXECUTOR_H
-#define ORDERBOOK_ORDEREXECUTOR_H
+#pragma once
 
 #include "orderbook/Orderbook.h"
 #include "OrderGenerator.h"
@@ -33,4 +32,3 @@ private:
 
 };
 
-#endif // ORDERBOOK_ORDEREXECUTOR_H

@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDER_H
-#define ORDERBOOK_ORDER_H
+#pragma once
 
 #include "Usings.h"
 #include "Side.h"
@@ -78,4 +73,3 @@ private:
 
 using Orders = std::list<Order>;
 using OrdersIterator = std::list<Order>::iterator;
-#endif //ORDERBOOK_ORDER_H

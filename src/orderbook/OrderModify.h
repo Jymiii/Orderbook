@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDERMODIFY_H
-#define ORDERBOOK_ORDERMODIFY_H
+#pragma once
 
 #include "Usings.h"
 #include "Side.h"
@@ -43,4 +38,3 @@ private:
     Quantity quantity_;
 };
 
-#endif //ORDERBOOK_ORDERMODIFY_H

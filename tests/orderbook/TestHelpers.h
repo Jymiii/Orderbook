@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_TESTHELPERS_H
-#define ORDERBOOK_TESTHELPERS_H
+#pragma once
 
 #include "orderbook/Orderbook.h"
 #include <gtest/gtest.h>
@@ -39,4 +34,3 @@ public:
     }
 };
 
-#endif //ORDERBOOK_TESTHELPERS_H

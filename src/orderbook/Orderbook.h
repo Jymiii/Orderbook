@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDERBOOK_H
-#define ORDERBOOK_ORDERBOOK_H
+#pragma once
 
 #include "Usings.h"
 #include "Order.h"
@@ -106,4 +101,3 @@ public:
     }
 };
 
-#endif //ORDERBOOK_ORDERBOOK_H
