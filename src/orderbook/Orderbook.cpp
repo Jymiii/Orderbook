@@ -127,7 +127,7 @@ std::optional<double> Orderbook::getMidPrice() const {
 void Orderbook::addOrder(const Order &order) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
@@ -139,7 +139,7 @@ void Orderbook::addOrder(const Order &order) {
 void Orderbook::cancelOrder(OrderId orderId) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
@@ -151,7 +151,7 @@ void Orderbook::cancelOrder(OrderId orderId) {
 void Orderbook::modifyOrder(const OrderModify &orderModify) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     const auto ordersIterator = orders_.find(orderModify.getId());
