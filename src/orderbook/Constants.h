@@ -1,7 +1,7 @@
 #pragma once
 
 #include <numeric>
-#include "Usings.h"
+#include "Types.h"
 
 namespace Constants {
     struct TimeOfDay {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Usings.h"
+#include "Types.h"
 
 struct LevelData {
     Quantity quantity{};
