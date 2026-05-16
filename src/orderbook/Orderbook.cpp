@@ -5,6 +5,7 @@
 #include "Orderbook.h"
 
 #include "utils/TimeUtil.h"
+#include <iostream>
 
 template<int N, Side S>
 void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
