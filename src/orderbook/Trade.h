@@ -9,28 +9,28 @@
 
 class Trade {
 public:
-    Trade(OrderId bidId, OrderId askId, Price bidPrice, Price askPrice, Quantity quantity)
+    Trade(OrderId bidId, OrderId askId, Price bidPrice, Price askPrice, Quantity quantity) noexcept
         : bidId_{bidId}, askId_{askId}, bidPrice_{bidPrice}, askPrice_{askPrice},
           quantity_{quantity} {
     }
 
-    [[nodiscard]] OrderId getBidId() const {
+    [[nodiscard]] OrderId getBidId() const noexcept {
         return bidId_;
     }
 
-    [[nodiscard]] OrderId getAskId() const {
+    [[nodiscard]] OrderId getAskId() const noexcept {
         return askId_;
     }
 
-    [[nodiscard]] Price getBidPrice() const {
+    [[nodiscard]] Price getBidPrice() const noexcept {
         return bidPrice_;
     }
 
-    [[nodiscard]] Price getAskPrice() const {
+    [[nodiscard]] Price getAskPrice() const noexcept {
         return askPrice_;
     }
 
-    [[nodiscard]] Quantity getQuantity() const {
+    [[nodiscard]] Quantity getQuantity() const noexcept {
         return quantity_;
     }
 

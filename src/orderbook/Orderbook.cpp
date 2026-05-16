@@ -9,16 +9,19 @@ void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     auto best = levels.getBestOrders();
     if (!best) return;
 
-    auto &[bestPrice, ordersRef] = *best;
-    auto &orders = ordersRef.get();
+    auto &orders = best->second.get();
 
     switch (auto &order = orders.front(); order.getType()) {
-        case OrderType::FillAndKill: cancelOrderInternal(order.getId());
+        case OrderType::FillAndKill:
+            cancelOrderInternal(order.getId());
             break;
 
-        case OrderType::FillOrKill: throw std::logic_error("There was a stale FOK order, should never be possible.");
+        case OrderType::FillOrKill:
+            assert(false && "Stale FOK order at best level: invariant violated");
+            break;
 
-        default: break;
+        default:
+            break;
     }
 }
 
@@ -112,10 +115,13 @@ Orderbook::~Orderbook() {
 }
 
 std::optional<double> Orderbook::getMidPrice() const {
+    std::scoped_lock _{orderMutex_};
     const auto bestBid = bids_.getBestPrice();
     const auto bestAsk = asks_.getBestPrice();
-    if (!bestBid && !bestAsk) return std::nullopt;
-    return (bestBid.value_or(bestAsk.value()) / 2.0 + bestAsk.value_or(bestBid.value()) / 2.0);
+    if (bestBid && bestAsk) return (*bestBid + *bestAsk) / 2.0;
+    if (bestBid) return static_cast<double>(*bestBid);
+    if (bestAsk) return static_cast<double>(*bestAsk);
+    return std::nullopt;
 }
 
 void Orderbook::addOrder(const Order &order) {
@@ -142,7 +148,7 @@ void Orderbook::cancelOrder(OrderId orderId) {
 #endif
 }
 
-void Orderbook::modifyOrder(OrderModify orderModify) {
+void Orderbook::modifyOrder(const OrderModify &orderModify) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
     timer_.start();
@@ -208,11 +214,11 @@ void Orderbook::addOrderInternal(Order order) {
             const auto worstBidPrice = bids_.getWorstPrice();
             if (!worstBidPrice) [[unlikely]] return;
             order.toFillAndKill(*worstBidPrice);
-        } else if (side == Side::Buy) {
+        } else {
             const auto worstAskPrice = asks_.getWorstPrice();
             if (!worstAskPrice) [[unlikely]] return;
             order.toFillAndKill(*worstAskPrice);
-        } else return;
+        }
     }
 
     const Price price = order.getPrice();

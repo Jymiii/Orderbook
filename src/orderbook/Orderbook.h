@@ -79,7 +79,7 @@ public:
 
     void addOrder(const Order &order);
 
-    void modifyOrder(OrderModify orderModify);
+    void modifyOrder(const OrderModify &orderModify);
 
     void cancelOrder(OrderId orderId);
 

@@ -12,27 +12,27 @@
 
 class OrderModify {
 public:
-    OrderModify(OrderId id, Side side, Price price, Quantity quantity)
+    OrderModify(OrderId id, Side side, Price price, Quantity quantity) noexcept
         : id_{id}, side_{side}, price_{price}, quantity_{quantity} {
     }
 
-    [[nodiscard]] OrderId getId() const {
+    [[nodiscard]] OrderId getId() const noexcept {
         return id_;
     }
 
-    [[nodiscard]] Side getSide() const {
+    [[nodiscard]] Side getSide() const noexcept {
         return side_;
     }
 
-    [[nodiscard]] Price getPrice() const {
+    [[nodiscard]] Price getPrice() const noexcept {
         return price_;
     }
 
-    [[nodiscard]] Quantity getQuantity() const {
+    [[nodiscard]] Quantity getQuantity() const noexcept {
         return quantity_;
     }
 
-    [[nodiscard]] Order toOrder(OrderType type) const {
+    [[nodiscard]] Order toOrder(OrderType type) const noexcept {
         return {id_, type, side_, price_, quantity_};
     }
 
