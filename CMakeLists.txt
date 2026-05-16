@@ -38,13 +38,13 @@ target_link_libraries(Orderbook PRIVATE orderbook_lib)
 enable_testing()
 
 add_executable(OrderbookTests
-        tests/orderbook/GoodTillCancelTest.cpp
-        tests/orderbook/OrderModifyTest.cpp
-        tests/orderbook/MarketOrderTest.cpp
-        tests/orderbook/FillOrKillTest.cpp
-        tests/orderbook/FillAndKillTest.cpp
-        tests/orderbook/GoodForDayTest.cpp
-        tests/orderbook/AdditionalTests.cpp
+        tests/GoodTillCancelTest.cpp
+        tests/OrderModifyTest.cpp
+        tests/MarketOrderTest.cpp
+        tests/FillOrKillTest.cpp
+        tests/FillAndKillTest.cpp
+        tests/GoodForDayTest.cpp
+        tests/AdditionalTests.cpp
 )
 target_compile_options(OrderbookTests PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
