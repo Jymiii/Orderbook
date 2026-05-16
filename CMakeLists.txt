@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.25)
 project(Orderbook)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-march=native)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -24,7 +29,7 @@ if (ORDERBOOK_ENABLE_INSTRUMENTATION)
     message(STATUS "Orderbook instrumentation: ON")
     target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)
 else()
-    message(STATUS "Orderbook instrumentation: OFF")
+    message(STATUS "Orderbook instrumentation: OFFi do")
 endif()
 
 add_executable(Orderbook
