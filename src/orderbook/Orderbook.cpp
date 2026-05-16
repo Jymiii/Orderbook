@@ -4,6 +4,8 @@
 
 #include "Orderbook.h"
 
+#include "utils/TimeUtil.h"
+
 template<int N, Side S>
 void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     auto best = levels.getBestOrders();
@@ -50,10 +52,12 @@ bool Orderbook::waitTillPruneTime() {
     using namespace std::chrono;
 
     auto now = system_clock::now();
-    std::time_t t = system_clock::to_time_t(now);
+    const std::time_t t = system_clock::to_time_t(now);
 
     std::tm tm{};
-    localtime_r(&t, &tm);
+    if (!safe_localtime(&t, &tm)) {
+        return false;
+    }
 
     tm.tm_hour = Constants::MarketCloseTime.hour;
     tm.tm_min = Constants::MarketCloseTime.minute;
