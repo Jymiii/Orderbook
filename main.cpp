@@ -1,5 +1,5 @@
-#include "synthetic_order_generator/MarketState.h"
-#include "synthetic_order_generator/OrderExecutor.h"
+#include "simulation/MarketState.h"
+#include "simulation/OrderExecutor.h"
 
 #include <iostream>
 

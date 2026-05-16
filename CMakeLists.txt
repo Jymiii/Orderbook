@@ -29,8 +29,8 @@ endif()
 
 add_executable(Orderbook
         main.cpp
-        src/synthetic_order_generator/OrderGenerator.cpp
-        src/synthetic_order_generator/OrderExecutor.cpp
+        src/simulation/OrderGenerator.cpp
+        src/simulation/OrderExecutor.cpp
 )
 target_compile_options(Orderbook PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
