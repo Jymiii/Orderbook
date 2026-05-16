@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-
-#ifndef ORDERBOOK_TIMER_H
-#define ORDERBOOK_TIMER_H
+#pragma once
 
 #include <chrono>
 
@@ -19,13 +14,8 @@ public:
         m_beg = Clock::now();
     }
 
-    void start() {
-        m_beg = Clock::now();
-    }
-
     [[nodiscard]] double elapsed() const {
         return std::chrono::duration_cast<Second>(Clock::now() - m_beg).count();
     }
 };
 
-#endif //ORDERBOOK_TIMER_H

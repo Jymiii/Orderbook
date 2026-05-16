@@ -1,5 +1,4 @@
-#ifndef ORDERBOOK_ORDERREGISTRY_H
-#define ORDERBOOK_ORDERREGISTRY_H
+#pragma once
 
 #include "orderbook/Order.h"
 #include "orderbook/OrderModify.h"
@@ -69,4 +68,3 @@ private:
     std::unordered_map<OrderId, std::size_t> idToIndex_;
 };
 
-#endif

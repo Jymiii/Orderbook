@@ -1,8 +1,4 @@
-//
-// Created by Jimi van der Meer on 12/02/2026.
-//
-#ifndef ORDERBOOK_ORDEREVENT_H
-#define ORDERBOOK_ORDEREVENT_H
+#pragma once
 
 #include <ostream>
 #include <utility>
@@ -69,4 +65,3 @@ struct OrderEvent {
     }
 };
 
-#endif //ORDERBOOK_ORDEREVENT_H

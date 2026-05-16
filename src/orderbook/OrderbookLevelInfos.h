@@ -1,9 +1,4 @@
-//
-// Created by Jimi van der Meer on 10/02/2026.
-//
-
-#ifndef ORDERBOOK_ORDERBOOKLEVELINFOS_H
-#define ORDERBOOK_ORDERBOOKLEVELINFOS_H
+#pragma once
 
 #include <ostream>
 #include "LevelInfo.h"
@@ -28,4 +23,3 @@ private:
     LevelInfos asks_;
 };
 
-#endif //ORDERBOOK_ORDERBOOKLEVELINFOS_H

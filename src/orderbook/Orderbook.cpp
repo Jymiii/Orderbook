@@ -4,6 +4,8 @@
 
 #include "Orderbook.h"
 
+#include "utils/TimeUtil.h"
+
 template<int N, Side S>
 void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     auto best = levels.getBestOrders();
@@ -50,10 +52,12 @@ bool Orderbook::waitTillPruneTime() {
     using namespace std::chrono;
 
     auto now = system_clock::now();
-    std::time_t t = system_clock::to_time_t(now);
+    const std::time_t t = system_clock::to_time_t(now);
 
     std::tm tm{};
-    localtime_r(&t, &tm);
+    if (!safe_localtime(&t, &tm)) {
+        return false;
+    }
 
     tm.tm_hour = Constants::MarketCloseTime.hour;
     tm.tm_min = Constants::MarketCloseTime.minute;
@@ -127,7 +131,7 @@ std::optional<double> Orderbook::getMidPrice() const {
 void Orderbook::addOrder(const Order &order) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
@@ -139,7 +143,7 @@ void Orderbook::addOrder(const Order &order) {
 void Orderbook::cancelOrder(OrderId orderId) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
@@ -151,7 +155,7 @@ void Orderbook::cancelOrder(OrderId orderId) {
 void Orderbook::modifyOrder(const OrderModify &orderModify) {
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     modifyCount_++;
-    timer_.start();
+    timer_.reset();
 #endif
     std::scoped_lock _{orderMutex_};
     const auto ordersIterator = orders_.find(orderModify.getId());
