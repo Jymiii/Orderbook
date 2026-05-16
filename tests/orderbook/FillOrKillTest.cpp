@@ -14,8 +14,7 @@ TEST(FillOrKill, NoCounterParty) {
     auto info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 0);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 }
 
 TEST(FillOrKill, CantFullyFillSimple) {
@@ -28,8 +27,7 @@ TEST(FillOrKill, CantFullyFillSimple) {
     auto info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 1);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 }
 
 TEST(FillOrKill, CanFullyFillSimple) {
@@ -61,28 +59,28 @@ TEST(FillOrKill, CantFullyFillBig) {
     auto info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 4);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 
     ob.addOrder(f.make(OrderType::FillOrKill, Side::Sell, 51, 30));
     EXPECT_EQ(ob.size(), 5);
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 4);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 
     ob.addOrder(f.make(OrderType::FillOrKill, Side::Sell, 52, 30));
     EXPECT_EQ(ob.size(), 5);
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 4);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 
     ob.addOrder(f.make(OrderType::FillOrKill, Side::Sell, 61, 1));
     EXPECT_EQ(ob.size(), 5);
     info = ob.getOrderInfos();
     EXPECT_EQ(info.getBids().size(), 4);
     EXPECT_EQ(info.getAsks().size(), 0);
-    EXPECT_TRUE((ob.getTrades().empty()));
+    EXPECT_TRUE(ob.getTrades().empty());
 }
 
 TEST(FillOrKill, CanFullyFillBig) {

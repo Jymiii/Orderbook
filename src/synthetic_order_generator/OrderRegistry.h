@@ -3,7 +3,6 @@
 
 #include "orderbook/Order.h"
 #include "orderbook/OrderModify.h"
-#include <algorithm>
 #include <optional>
 #include <random>
 #include <unordered_map>

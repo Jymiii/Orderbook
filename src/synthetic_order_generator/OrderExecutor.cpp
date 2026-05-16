@@ -3,23 +3,24 @@
 //
 #include "OrderExecutor.h"
 
+#include "shared/Timer.h"
+
 #include <fstream>
-#include <iostream>
+#include <stdexcept>
 #include <utility>
 
-OrderExecutor::OrderExecutor(MarketState state, size_t ticks, std::string persist_path)
+OrderExecutor::OrderExecutor(const MarketState &state, size_t ticks, std::string persist_path)
     : generator_{state, ticks}, persist_path_{std::move(persist_path)} {
 }
 
 double OrderExecutor::run(const std::string &csv_path) {
     if (csv_path.empty()) {
         return runFromSimulation();
-    } else {
-        return runFromCsv(csv_path);
     }
+    return runFromCsv(csv_path);
 }
 
-const std::unique_ptr<Orderbook>& OrderExecutor::getOrderbook() {
+const std::unique_ptr<Orderbook> &OrderExecutor::getOrderbook() const {
     return orderbook_;
 }
 

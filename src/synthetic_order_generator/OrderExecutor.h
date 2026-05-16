@@ -3,7 +3,6 @@
 
 #include "orderbook/Orderbook.h"
 #include "OrderGenerator.h"
-#include "shared/Timer.h"
 
 #include <cstddef>
 #include <string>
@@ -11,18 +10,16 @@
 
 class OrderExecutor {
 public:
-    OrderExecutor() = default;
-
-    OrderExecutor(MarketState state, size_t ticks, std::string persist_path = "");
+    OrderExecutor(const MarketState &state, size_t ticks, std::string persist_path = "");
 
     double run(const std::string &csv_path = "");
 
-    const std::unique_ptr<Orderbook>& getOrderbook();
+    [[nodiscard]] const std::unique_ptr<Orderbook> &getOrderbook() const;
 
 private:
     std::unique_ptr<Orderbook> orderbook_ = std::make_unique<Orderbook>(true);
-    OrderGenerator generator_{MarketState{}, 100000};
-    std::string persist_path_{};
+    OrderGenerator generator_;
+    std::string persist_path_;
 
     static std::vector<OrderEvent> getOrdersFromCsv(const std::string &path);
 

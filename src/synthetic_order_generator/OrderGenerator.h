@@ -16,7 +16,7 @@ class OrderGenerator {
 public:
     std::vector<OrderEvent> generate();
 
-    OrderGenerator(MarketState state, size_t ticks) : state_{state}, ticks_{ticks} {
+    OrderGenerator(const MarketState &state, size_t ticks) : state_{state}, ticks_{ticks} {
     }
 
 private:
@@ -25,8 +25,7 @@ private:
     MarketState state_{};
     size_t ticks_{};
 
-    std::random_device dev_{};
-    std::mt19937 rng_{dev_()};
+    std::mt19937 rng_{std::random_device{}()};
     std::normal_distribution<double> normalDist_{0.0, 1.0};
     std::uniform_real_distribution<double> uniformSpread_{-0.499999999, 0.5};
     std::uniform_real_distribution<double> uniformZeroToOne_{0, 1};
@@ -52,7 +51,7 @@ private:
 
     void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent> &out);
 
-    [[maybe_unused]] void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
+    void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
 
     Price getRandomOrderPrice(double mid, Side side);
 

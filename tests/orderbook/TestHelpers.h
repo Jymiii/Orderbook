@@ -7,6 +7,7 @@
 
 #include "orderbook/Orderbook.h"
 #include <gtest/gtest.h>
+#include <algorithm>
 
 struct OrderFactory {
     OrderId id = 0;
