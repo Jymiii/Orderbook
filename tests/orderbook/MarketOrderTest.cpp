@@ -3,7 +3,6 @@
 //
 
 #include "TestHelpers.h"
-#include "gtest/gtest.h"
 
 TEST(MarketOrder, AddBuys_NoSells) {
     OrderFactory f;

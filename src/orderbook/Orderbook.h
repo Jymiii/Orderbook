@@ -13,8 +13,6 @@
 #include "LevelArray.h"
 #include <thread>
 #include <mutex>
-#include <condition_variable>
-#include <memory>
 
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
 
@@ -35,8 +33,8 @@ private:
     Timer timer_{};
 #endif
 
-    std::unique_ptr<LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy>> bids_;
-    std::unique_ptr<LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell>> asks_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
+    LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
     std::unordered_map<OrderId, OrdersIterator> orders_;
     Trades trades_;
 

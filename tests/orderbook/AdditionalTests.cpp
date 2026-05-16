@@ -1,5 +1,4 @@
 #include "TestHelpers.h"
-#include "gtest/gtest.h"
 
 TEST(Guards, ZeroQuantityOrder_IsIgnored) {
     OrderFactory f;

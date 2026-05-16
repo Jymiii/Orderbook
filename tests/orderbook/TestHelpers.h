@@ -6,7 +6,7 @@
 #define ORDERBOOK_TESTHELPERS_H
 
 #include "orderbook/Orderbook.h"
-#include <algorithm>
+#include <gtest/gtest.h>
 
 struct OrderFactory {
     OrderId id = 0;

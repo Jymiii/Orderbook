@@ -2,7 +2,6 @@
 // Created by Jimi van der Meer on 12/02/2026.
 //
 #include "TestHelpers.h"
-#include "gtest/gtest.h"
 
 TEST(GoodForDay, PruneStaleGoodForNow_RemovesOnlyGFD) {
     OrderFactory f;

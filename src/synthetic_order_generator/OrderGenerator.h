@@ -11,7 +11,6 @@
 
 #include <random>
 #include <vector>
-#include <array>
 
 class OrderGenerator {
 public:

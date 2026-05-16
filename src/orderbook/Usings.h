@@ -5,7 +5,6 @@
 #define ORDERBOOK_USINGS_H
 
 #include <vector>
-#include <cstdint>
 
 using Price = std::int32_t;
 using Quantity = std::uint64_t;
