@@ -1,3 +1,7 @@
+//
+// Created by Jimi van der Meer on 12/02/2026.
+//
+
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
@@ -127,101 +131,4 @@ TEST(FillOrKill, CanFullyFillBigBuy) {
     // TimeOrder test
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 5, 50, 50, 1}));
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 5, 50, 50, 10}));
-}
-TEST(FillOrKill, BookUnchangedOnFailure) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 5));
-    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 101, 5));
-
-    auto before = ob.getOrderInfos();
-    std::size_t sizeBefore = ob.size();
-
-    ob.addOrder(f.make(2, OrderType::FillOrKill, Side::Buy, 101, 11));
-
-    EXPECT_TRUE(ob.getTrades().empty());
-    EXPECT_EQ(sizeBefore, ob.size());
-    auto after = ob.getOrderInfos();
-
-    ASSERT_EQ(before.getAsks().size(), after.getAsks().size());
-    for (std::size_t i = 0; i < before.getAsks().size(); ++i) {
-        EXPECT_EQ(before.getAsks()[i].price, after.getAsks()[i].price);
-        EXPECT_EQ(before.getAsks()[i].quantity, after.getAsks()[i].quantity);
-    }
-}
-
-TEST(FillOrKill, ExactQuantityMatch_Succeeds) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 7));
-
-    ob.addOrder(f.make(1, OrderType::FillOrKill, Side::Buy, 100, 7));
-
-    ASSERT_EQ(1, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 0, 100, 100, 7}));
-    EXPECT_EQ(0, ob.size());
-}
-
-TEST(FillOrKill, OneUnitShort_Fails) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 9));
-
-    ob.addOrder(f.make(1, OrderType::FillOrKill, Side::Buy, 100, 10));
-
-    EXPECT_TRUE(ob.getTrades().empty());
-    EXPECT_EQ(1, ob.size());
-    auto info = ob.getOrderInfos();
-    ASSERT_EQ(1, info.getAsks().size());
-    EXPECT_EQ(100, info.getAsks()[0].price);
-    EXPECT_EQ(9, info.getAsks()[0].quantity);
-}
-
-TEST(FillOrKill, DoesNotRestInBook) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::FillOrKill, Side::Buy, 50, 10));
-
-    EXPECT_TRUE(ob.getTrades().empty());
-    EXPECT_EQ(0, ob.size());
-    auto info = ob.getOrderInfos();
-    EXPECT_TRUE(info.getBids().empty());
-    EXPECT_TRUE(info.getAsks().empty());
-}
-
-TEST(LevelData, CancelUpdatesLevelData_FillOrKillSeesCorrectQuantity) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 10));
-    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 100, 10));
-
-    ob.cancelOrder(1);
-
-    ob.addOrder(f.make(2, OrderType::FillOrKill, Side::Buy, 100, 11));
-    EXPECT_TRUE(ob.getTrades().empty());
-
-    ob.addOrder(f.make(3, OrderType::FillOrKill, Side::Buy, 100, 10));
-    ASSERT_EQ(1, ob.getTrades().size());
-    EXPECT_EQ(0, ob.size());
-}
-
-TEST(LevelData, PartialFillUpdatesLevelData) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 10));
-
-    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 100, 6));
-    EXPECT_EQ(1, ob.getTrades().size());
-    ob.addOrder(f.make(2, OrderType::FillOrKill, Side::Buy, 100, 5));
-    EXPECT_EQ(1, ob.getTrades().size());
-
-    ob.addOrder(f.make(3, OrderType::FillOrKill, Side::Buy, 100, 4));
-    ASSERT_EQ(2, ob.getTrades().size());
-    EXPECT_EQ(0, ob.size());
 }

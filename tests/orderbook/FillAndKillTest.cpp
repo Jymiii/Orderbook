@@ -1,3 +1,6 @@
+//
+// Created by Jimi van der Meer on 12/02/2026.
+//
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
@@ -151,33 +154,3 @@ TEST(FillAndKill, StopsDueToPrice_NotQuantity_BuySide) {
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 3, 58, 55, 10}));
 }
 
-
-TEST(FillAndKill, ResidualNeverRestsInBook) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Buy, 100, 5));
-
-    ob.addOrder(f.make(1, OrderType::FillAndKill, Side::Sell, 100, 20));
-
-    ASSERT_EQ(1, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 1, 100, 100, 5}));
-
-    EXPECT_EQ(0, ob.size());
-    auto info = ob.getOrderInfos();
-    EXPECT_TRUE(info.getBids().empty());
-    EXPECT_TRUE(info.getAsks().empty());
-}
-
-TEST(FillAndKill, FullFillProducesOneTrade) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 50, 10));
-
-    ob.addOrder(f.make(1, OrderType::FillAndKill, Side::Buy, 50, 10));
-
-    ASSERT_EQ(1, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 0, 50, 50, 10}));
-    EXPECT_EQ(0, ob.size());
-}

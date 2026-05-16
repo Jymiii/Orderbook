@@ -42,20 +42,23 @@ std::vector<OrderEvent> OrderGenerator::generate() {
                              + std::sqrt(dt) * sigma * getRandom());
         int eventCount = eventCountDist_(rng_);
 
-        int addCount = 0, cancelCount = 0;
+        int addCount = 0, cancelCount = 0, modifyCount = 0;
         for (int k = 0; k < eventCount; ++k) {
             auto type = static_cast<EventType>(eventTypeDist_(rng_));
             switch (type) {
-                case EventType::New: ++addCount; break;
-                case EventType::Cancel: ++cancelCount; break;
-                case EventType::Modify: break;
+                case EventType::New: ++addCount;
+                    break;
+                case EventType::Cancel: ++cancelCount;
+                    break;
+                case EventType::Modify: ++modifyCount;
+                    break;
             }
         }
 
         std::vector<OrderEvent> eventBucket;
-        eventBucket.reserve(addCount + cancelCount);
+        eventBucket.reserve(addCount + cancelCount + modifyCount);
 
-        // Cancels first so we do not cancel orders in the same burst as we add them.
+        //Cancels/Modify first so we do not cancel orders in the same burst as we add them.
         generateCancelOrderEvents(cancelCount, eventBucket);
         generateAddOrderEvents(mid, addCount, eventBucket);
 
@@ -66,6 +69,7 @@ std::vector<OrderEvent> OrderGenerator::generate() {
     }
     return orders;
 }
+
 
 void OrderGenerator::generateAddOrderEvents(double mid, int addCount, std::vector<OrderEvent> &out) {
     if (addCount <= 0) return;
@@ -78,7 +82,10 @@ void OrderGenerator::generateAddOrderEvents(double mid, int addCount, std::vecto
         const OrderType type = getRandomOrderType();
 
         auto newOrder{Order{nextId_++, type, side, px, getRandomQuantity()}};
-        out.emplace_back(EventType::New, newOrder);
+        out.emplace_back(
+            EventType::New,
+            newOrder
+        );
         registry_.onNew(newOrder);
     }
 }
@@ -93,5 +100,38 @@ void OrderGenerator::generateCancelOrderEvents(int cancelCount, std::vector<Orde
         if (!order.has_value()) return;
         out.emplace_back(EventType::Cancel, order.value().getId());
         registry_.onCancel(order.value().getId());
+    }
+}
+
+[[maybe_unused]] void OrderGenerator::generateModifyOrderEvents(double mid, int modifyCount,
+                                                                std::vector<OrderEvent> &out) {
+    if (modifyCount <= 0) return;
+
+    out.reserve(out.size() + static_cast<size_t>(modifyCount));
+
+    for (int i = 0; i < modifyCount; ++i) {
+        auto order = registry_.randomLive(rng_);
+        if (!order.has_value()) return;
+
+        Price price = order->getPrice();
+        Quantity quantity = order->getRemainingQuantity();
+        Side side = order->getSide();
+
+        if (bernoulliDist_(rng_)) {
+            quantity = getRandomQuantity();
+        }
+        if (bernoulliDist_(rng_)) {
+            side = getRandomSide();
+        }
+        if (bernoulliDist_(rng_)) {
+            price = getRandomOrderPrice(mid, side);
+        }
+
+        auto modify{OrderModify{order->getId(), side, price, quantity}};
+        out.emplace_back(
+            EventType::Modify,
+            modify
+        );
+        registry_.onModify(modify);
     }
 }

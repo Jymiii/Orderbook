@@ -1,8 +1,9 @@
-#pragma once
+#ifndef ORDERBOOK_ORDEREXECUTOR_H
+#define ORDERBOOK_ORDEREXECUTOR_H
 
 #include "orderbook/Orderbook.h"
 #include "OrderGenerator.h"
-#include "utils/Timer.h"
+#include "shared/Timer.h"
 
 #include <cstddef>
 #include <string>
@@ -32,4 +33,7 @@ private:
     [[nodiscard]] double executeOrdersPersist(const std::vector<OrderEvent> &events) const;
 
     [[nodiscard]] double runFromCsv(const std::string &csv_path) const;
+
 };
+
+#endif // ORDERBOOK_ORDEREXECUTOR_H

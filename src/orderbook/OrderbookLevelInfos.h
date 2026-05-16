@@ -1,7 +1,12 @@
-#pragma once
+//
+// Created by Jimi van der Meer on 10/02/2026.
+//
 
-#include "LevelInfo.h"
+#ifndef ORDERBOOK_ORDERBOOKLEVELINFOS_H
+#define ORDERBOOK_ORDERBOOKLEVELINFOS_H
+
 #include <ostream>
+#include "LevelInfo.h"
 
 class OrderbookLevelInfos {
 public:
@@ -22,3 +27,5 @@ private:
     LevelInfos bids_;
     LevelInfos asks_;
 };
+
+#endif //ORDERBOOK_ORDERBOOKLEVELINFOS_H

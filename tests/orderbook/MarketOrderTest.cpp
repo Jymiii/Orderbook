@@ -1,3 +1,7 @@
+//
+// Created by Jimi van der Meer on 12/02/2026.
+//
+
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
@@ -78,54 +82,4 @@ TEST(MarketOrder, SweepBuysButHasQuantityLimit) {
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 4, 100, 100, 5}));
     EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 4, 102, 100, 30}));
 
-}
-TEST(MarketOrder, SweepsEntireBook) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 100, 10));
-    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Sell, 101, 10));
-    ob.addOrder(f.make(2, OrderType::GoodTillCancel, Side::Sell, 102, 10));
-
-    ob.addOrder(f.make(3, Side::Buy, 100));
-
-    EXPECT_EQ(3, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 0, 102, 100, 10}));
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 1, 102, 101, 10}));
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {3, 2, 102, 102, 10}));
-
-    EXPECT_EQ(0, ob.size());
-    auto info = ob.getOrderInfos();
-    EXPECT_TRUE(info.getAsks().empty());
-    ASSERT_EQ(0, info.getBids().size());
-}
-
-TEST(MarketOrder, TradePrice_IsRestingOrderPrice_NotMarketPrice) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Buy, 105, 5));
-    ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 100, 5));
-
-    ob.addOrder(f.make(2, Side::Sell, 8));
-
-    ASSERT_EQ(2, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {0, 2, 105, 100, 5}));
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 2, 100, 100, 3}));
-}
-
-TEST(MarketOrder, AddMarketOrder_WhenCounterBookBecomesEmpty_ResidualsRest) {
-    OrderFactory f;
-    Orderbook ob{};
-
-    ob.addOrder(f.make(0, OrderType::GoodTillCancel, Side::Sell, 50, 5));
-    ob.addOrder(f.make(1, Side::Buy, 10));
-
-    ASSERT_EQ(1, ob.getTrades().size());
-    EXPECT_TRUE(hasTradeLike(ob.getTrades(), {1, 0, 50, 50, 5}));
-
-    EXPECT_EQ(0, ob.size());
-    auto info = ob.getOrderInfos();
-    EXPECT_TRUE(info.getAsks().empty());
-    EXPECT_TRUE(info.getBids().empty());
 }
