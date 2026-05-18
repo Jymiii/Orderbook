@@ -9,7 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
 
@@ -32,7 +32,7 @@ private:
 
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Buy> bids_;
     LevelArray<Constants::LEVELARRAY_SIZE, Side::Sell> asks_;
-    std::unordered_map<OrderId, OrdersIterator> orders_;
+    boost::unordered_flat_map<OrderId, OrdersIterator> orders_;
     Trades trades_;
 
     mutable std::mutex orderMutex_{};

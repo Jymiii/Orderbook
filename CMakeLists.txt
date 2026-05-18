@@ -23,6 +23,15 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+FetchContent_Declare(
+        Boost
+        URL https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.xz
+        URL_HASH SHA256=2c5ec5edcdff47ff55e27ed9560b0a0b94b07bd07ed9928b476150e16b0efc57
+)
+set(BOOST_INCLUDE_LIBRARIES unordered)
+set(BOOST_ENABLE_CMAKE ON)
+FetchContent_MakeAvailable(Boost)
+
 add_library(orderbook_lib
         src/orderbook/Orderbook.cpp
         src/orderbook/LevelData.h
@@ -35,7 +44,7 @@ if (ORDERBOOK_ENABLE_INSTRUMENTATION)
     message(STATUS "Orderbook instrumentation: ON")
     target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)
 else()
-    message(STATUS "Orderbook instrumentation: OFFi do")
+    message(STATUS "Orderbook instrumentation: OFF")
 endif()
 
 add_executable(Orderbook
@@ -59,6 +68,7 @@ add_executable(OrderbookTests
 )
 target_compile_options(OrderbookTests PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
+target_link_libraries(orderbook_lib PUBLIC Boost::unordered)
 
 include(GoogleTest)
 gtest_discover_tests(OrderbookTests)
