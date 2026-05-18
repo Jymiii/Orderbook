@@ -16,3 +16,5 @@ Thumbs.db
 # Local generated data
 data/orders.txt
 persist.csv
+
+.claude/

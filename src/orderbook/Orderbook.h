@@ -8,6 +8,8 @@
 #include "LevelArray.h"
 #include <thread>
 #include <mutex>
+#include <condition_variable>
+
 
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
 
