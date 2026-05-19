@@ -28,19 +28,9 @@ void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     }
 }
 
-void Orderbook::pruneStaleGoodForDay() {
-    while (true) {
-        if (waitTillPruneTime()) {
-            return;
-        }
-        pruneStaleGoodForNow();
-    }
-}
-
 void Orderbook::pruneStaleGoodForNow() {
     OrderIds stale;
     {
-        std::scoped_lock lock{orderMutex_};
         for (const auto &[id, ordersIterator]: orders_) {
             if (ordersIterator->getType() == OrderType::GoodForDay)
                 stale.push_back(id);
@@ -49,58 +39,7 @@ void Orderbook::pruneStaleGoodForNow() {
     cancelOrders(stale);
 }
 
-bool Orderbook::waitTillPruneTime() {
-    using namespace std::chrono;
-
-    auto now = system_clock::now();
-    const std::time_t t = system_clock::to_time_t(now);
-
-    std::tm tm{};
-    if (!safe_localtime(&t, &tm)) {
-        return false;
-    }
-
-    tm.tm_hour = Constants::MarketCloseTime.hour;
-    tm.tm_min = Constants::MarketCloseTime.minute;
-    tm.tm_sec = Constants::MarketCloseTime.second;
-
-    auto close_tp = system_clock::from_time_t(std::mktime(&tm));
-    if (close_tp <= now) {
-        tm.tm_mday += 1;
-        close_tp = system_clock::from_time_t(std::mktime(&tm));
-    }
-    auto until = close_tp - now;
-
-    {
-        std::unique_lock<std::mutex> lock(orderMutex_);
-
-        shutdownConditionVariable_.wait_for(
-            lock, until,
-            [&] { return shutdown_; }
-        );
-
-        if (shutdown_) return true;
-    }
-    return false;
-}
-
-Orderbook::Orderbook(bool startPruneThread) {
-    if (startPruneThread) {
-        gfdPruneThread_ = std::thread([this] {
-            pruneStaleGoodForDay();
-        });
-    }
-    orders_.reserve(Constants::INITIAL_ORDER_CAPACITY);
-}
-
 Orderbook::~Orderbook() {
-    {
-        std::scoped_lock lock(orderMutex_);
-        shutdown_ = true;
-    }
-    shutdownConditionVariable_.notify_all();
-    if (gfdPruneThread_.joinable()) gfdPruneThread_.join();
-
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     if (addCount_ > 0)
         std::cout << "Average time for an add: " << addTotalTime_ / addCount_ * 1e9 << "ns {Total time spent: "
@@ -115,12 +54,10 @@ Orderbook::~Orderbook() {
 // ===== Public API =====
 
 [[nodiscard]] std::size_t Orderbook::size() const {
-    std::scoped_lock _{orderMutex_};
     return orders_.size();
 }
 
 std::optional<double> Orderbook::getMidPrice() const {
-    std::scoped_lock _{orderMutex_};
     const auto bestBid = bids_.getBestPrice();
     const auto bestAsk = asks_.getBestPrice();
     if (bestBid && bestAsk) return (*bestBid + *bestAsk) / 2.0;
@@ -134,7 +71,6 @@ void Orderbook::addOrder(const Order &order) {
     addCount_++;
     timer_.reset();
 #endif
-    std::scoped_lock _{orderMutex_};
     addOrderInternal(order);
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     addTotalTime_ += timer_.elapsed();
@@ -146,7 +82,6 @@ void Orderbook::cancelOrder(OrderId orderId) {
     cancelCount_++;
     timer_.reset();
 #endif
-    std::scoped_lock _{orderMutex_};
     cancelOrderInternal(orderId);
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
     cancelTotalTime_ += timer_.elapsed();
@@ -158,7 +93,6 @@ void Orderbook::modifyOrder(const OrderModify &orderModify) {
     modifyCount_++;
     timer_.reset();
 #endif
-    std::scoped_lock _{orderMutex_};
     const auto ordersIterator = orders_.find(orderModify.getId());
     if (ordersIterator == orders_.end()) return;
 #ifdef ORDERBOOK_ENABLE_INSTRUMENTATION
@@ -175,8 +109,6 @@ void Orderbook::modifyOrder(const OrderModify &orderModify) {
 // ===== Internal cancel / add helpers =====
 
 void Orderbook::cancelOrders(const OrderIds &orderIds) {
-    std::scoped_lock _{orderMutex_};
-
     for (const OrderId id: orderIds) {
         cancelOrderInternal(id);
     }
@@ -333,8 +265,6 @@ void Orderbook::matchOrders() {
 // ===== Read-only views =====
 
 [[nodiscard]] OrderbookLevelInfos Orderbook::getOrderInfos() const {
-    std::scoped_lock _{orderMutex_};
-
     LevelInfos levelInfosBids, levelInfosAsks;
 
     auto createLevelInfo = [](Price price, const Orders &orders) {

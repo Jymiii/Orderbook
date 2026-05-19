@@ -3,11 +3,11 @@
 #include "Side.h"
 #include "LevelData.h"
 
-#include <array>
 #include <cassert>
 #include <functional>
-#include <utility>
+#include <memory>
 #include <optional>
+#include <utility>
 
 template<Side S>
 struct BestScanPolicy;
@@ -219,7 +219,7 @@ private:
         LevelData data{};
     };
 
-    std::array<LevelSlot, N> levels_{};
+    std::unique_ptr<LevelSlot[]> levels_ = std::make_unique<LevelSlot[]>(N);
 
     int bestIdx_{P::start(N)};
     int worstIdx_{P::start(N)};

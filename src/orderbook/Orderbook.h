@@ -35,11 +35,6 @@ private:
     boost::unordered_flat_map<OrderId, OrdersIterator> orders_;
     Trades trades_;
 
-    mutable std::mutex orderMutex_{};
-    std::thread gfdPruneThread_;
-    bool shutdown_{false};
-    std::condition_variable shutdownConditionVariable_{};
-
     friend class PruneTestHelper;
 
     void onOrderMatched(Price price, Quantity quantity, bool fullMatch, Side side);
@@ -70,7 +65,7 @@ private:
     void addOrderInternal(Order order);
 
 public:
-    explicit Orderbook(bool startPruneThread = true);
+    explicit Orderbook() = default;
 
     ~Orderbook();
 
@@ -80,7 +75,7 @@ public:
 
     void cancelOrder(OrderId orderId);
 
-    std::optional<double> getMidPrice() const;
+    [[nodiscard]] std::optional<double> getMidPrice() const;
 
     [[nodiscard]] std::size_t size() const;
 
@@ -92,13 +87,11 @@ public:
         return os << ob.getOrderInfos();
     }
 
-    const Trades &getTrades() const {
-        std::scoped_lock _{orderMutex_};
+    [[nodiscard]] const Trades &getTrades() const {
         return trades_;
     }
 
     void clearTrades() {
-        std::scoped_lock _{orderMutex_};
         trades_.clear();
     }
 };
