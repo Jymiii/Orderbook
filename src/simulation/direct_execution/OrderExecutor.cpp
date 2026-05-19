@@ -37,7 +37,9 @@ double OrderExecutor::executeCommands(const std::vector<Command>& commands) cons
                        [&](const ModifyOrderCmd& c)
                        {
                            orderbook_->modifyOrder(OrderModify{c.id, c.side, c.price, c.quantity});
-                       }
+                       },
+                       [&](const PruneGFDCmd&) { orderbook_->pruneStaleGoodForDay(); }
+
                    }, cmd);
     }
 
@@ -78,6 +80,8 @@ double OrderExecutor::executeCommandsPersist(const std::vector<Command> &command
                                << ',' << c.price
                                << ',' << c.quantity << '\n';
                        }
+            ,
+                       [&](const PruneGFDCmd&) { orderbook_->pruneStaleGoodForDay(); }
                    }, cmd);
     }
 

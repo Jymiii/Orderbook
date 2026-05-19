@@ -41,7 +41,8 @@ private:
         std::visit(Overloaded{
             [&](const NewOrderCmd& c) { orderbook_.addOrder(Order{c.id, c.type, c.side, c.price, c.quantity}); },
             [&](const CancelOrderCmd& c) { orderbook_.cancelOrder(c.id); },
-            [&](const ModifyOrderCmd& c) { orderbook_.modifyOrder(OrderModify{c.id, c.side, c.price, c.quantity}); }
+            [&](const ModifyOrderCmd& c) { orderbook_.modifyOrder(OrderModify{c.id, c.side, c.price, c.quantity}); },
+                [&](const PruneGFDCmd&) { orderbook_.pruneStaleGoodForDay(); }
         }, cmd);
     }
 };

@@ -30,7 +30,7 @@ inline bool hasTradeLike(const Trades &trades, const Trade &trade) {
 class PruneTestHelper {
 public:
     static void pruneStaleGoodForNow(Orderbook &ob) {
-        ob.pruneStaleGoodForNow();
+        ob.pruneStaleGoodForDay();
     }
 };
 

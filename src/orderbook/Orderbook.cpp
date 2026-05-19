@@ -28,7 +28,8 @@ void Orderbook::pruneStaleFillOrKill(LevelArray<N, S> &levels) {
     }
 }
 
-void Orderbook::pruneStaleGoodForNow() {
+void Orderbook::pruneStaleGoodForDay()
+{
     OrderIds stale;
     {
         for (const auto &[id, ordersIterator]: orders_) {

@@ -56,12 +56,6 @@ private:
 
     void cancelOrderInternal(OrderId orderId);
 
-    void pruneStaleGoodForDay();
-
-    bool waitTillPruneTime();
-
-    void pruneStaleGoodForNow();
-
     void addOrderInternal(Order order);
 
 public:
@@ -74,6 +68,8 @@ public:
     void modifyOrder(const OrderModify &orderModify);
 
     void cancelOrder(OrderId orderId);
+
+    void pruneStaleGoodForDay();
 
     [[nodiscard]] std::optional<double> getMidPrice() const;
 

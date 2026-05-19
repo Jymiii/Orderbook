@@ -36,4 +36,8 @@ struct ModifyOrderCmd
     Quantity quantity;
 };
 
-using Command = std::variant<NewOrderCmd, CancelOrderCmd, ModifyOrderCmd>;
+struct PruneGFDCmd
+{
+};
+
+using Command = std::variant<NewOrderCmd, CancelOrderCmd, ModifyOrderCmd, PruneGFDCmd>;
