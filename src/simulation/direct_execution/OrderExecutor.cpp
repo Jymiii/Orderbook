@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-OrderExecutor::OrderExecutor(const MarketState &state, size_t ticks, std::string persist_path)
+OrderExecutor::OrderExecutor(const MarketState &state, const size_t ticks, std::string persist_path)
     : generator_{state, ticks}, persist_path_{std::move(persist_path)} {
 }
 
@@ -118,11 +118,9 @@ std::vector<Command> OrderExecutor::getCommandsFromCsv(const std::string &path) 
         }
         members.push_back(str.substr(from));
 
-        const int action = std::stoi(members[0]);
-
-        if (action == 0)
+        if (const int action = std::stoi(members[0]); action == 0)
         {
-            commands.push_back(NewOrderCmd{
+            commands.emplace_back(NewOrderCmd{
                 static_cast<OrderType>(std::stoi(members[2])),
                 static_cast<Side>(std::stoi(members[3])),
                 static_cast<Price>(std::stoll(members[4])),
@@ -132,11 +130,11 @@ std::vector<Command> OrderExecutor::getCommandsFromCsv(const std::string &path) 
         }
         else if (action == 1)
         {
-            commands.push_back(CancelOrderCmd{
+            commands.emplace_back(CancelOrderCmd{
                 static_cast<OrderId>(std::stoll(members[1]))
             });
         } else if (action == 2) {
-            commands.push_back(ModifyOrderCmd{
+            commands.emplace_back(ModifyOrderCmd{
                 static_cast<Side>(std::stoi(members[2])),
                 static_cast<Price>(std::stoll(members[3])),
                 static_cast<OrderId>(std::stoll(members[1])),

@@ -5,7 +5,7 @@
 
 TEST(GoodForDay, PruneStaleGoodForNow_RemovesOnlyGFD) {
     OrderFactory f;
-    Orderbook ob{false};
+    Orderbook ob{};
 
     // Add mix
     ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Buy, 50, 10));

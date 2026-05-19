@@ -283,7 +283,7 @@ TEST(FillAndKill, FullFillProducesOneTrade) {
 
 TEST(ModifyOrder, PreservesOrderType) {
     OrderFactory f;
-    Orderbook ob{false};
+    Orderbook ob{};
     ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Buy, 100, 10));
     EXPECT_EQ(1, ob.size());
 
@@ -397,14 +397,14 @@ TEST(CrossSpread, AddingBid_ImmediatelyMatchesExistingAsk) {
 
 
 TEST(GoodForDay, PruneOnEmptyBook_IsNoOp) {
-    Orderbook ob{false};
+    Orderbook ob{};
     EXPECT_NO_FATAL_FAILURE(PruneTestHelper::pruneStaleGoodForNow(ob));
     EXPECT_EQ(0, ob.size());
 }
 
 TEST(GoodForDay, PruneAllGFD_ClearsBook) {
     OrderFactory f;
-    Orderbook ob{false};
+    Orderbook ob{};
 
     ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Buy, 50, 10));
     ob.addOrder(f.make(1, OrderType::GoodForDay, Side::Sell, 60, 5));
@@ -420,7 +420,7 @@ TEST(GoodForDay, PruneAllGFD_ClearsBook) {
 
 TEST(GoodForDay, PruneDoesNotAffectMatchedGFD) {
     OrderFactory f;
-    Orderbook ob{false};
+    Orderbook ob{};
 
     ob.addOrder(f.make(0, OrderType::GoodForDay, Side::Sell, 100, 10));
     ob.addOrder(f.make(1, OrderType::GoodTillCancel, Side::Buy, 100, 10));
