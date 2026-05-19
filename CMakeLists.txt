@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(Orderbook)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-march=native)
     include(CheckIPOSupported)
@@ -12,10 +15,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
 include(FetchContent)
+
 FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
@@ -25,36 +29,60 @@ FetchContent_MakeAvailable(googletest)
 
 FetchContent_Declare(
         Boost
-        URL https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.xz
+        URL      https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.xz
         URL_HASH SHA256=2c5ec5edcdff47ff55e27ed9560b0a0b94b07bd07ed9928b476150e16b0efc57
 )
 set(BOOST_INCLUDE_LIBRARIES unordered)
 set(BOOST_ENABLE_CMAKE ON)
 FetchContent_MakeAvailable(Boost)
 
+FetchContent_Declare(
+        spsc_queue
+        GIT_REPOSITORY https://github.com/Jymiii/scpc_queue.git
+        GIT_TAG        d8aa171f0e5665f541aa21daad8474b0ea5750d3
+)
+FetchContent_MakeAvailable(spsc_queue)
+
+# ---------------------------------------------------------------------------
+# Orderbook library
+# ---------------------------------------------------------------------------
 add_library(orderbook_lib
         src/orderbook/Orderbook.cpp
         src/orderbook/LevelData.h
 )
 target_include_directories(orderbook_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_options(orderbook_lib PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(orderbook_lib PUBLIC Boost::unordered spsc_queue::spsc_queue)
 
 option(ORDERBOOK_ENABLE_INSTRUMENTATION "Enable per-operation timing counters" OFF)
-if (ORDERBOOK_ENABLE_INSTRUMENTATION)
+if(ORDERBOOK_ENABLE_INSTRUMENTATION)
     message(STATUS "Orderbook instrumentation: ON")
     target_compile_definitions(orderbook_lib PUBLIC ORDERBOOK_ENABLE_INSTRUMENTATION)
 else()
     message(STATUS "Orderbook instrumentation: OFF")
 endif()
 
+# ---------------------------------------------------------------------------
+# Main executable
+# ---------------------------------------------------------------------------
 add_executable(Orderbook
         main.cpp
-        src/simulation/OrderGenerator.cpp
-        src/simulation/OrderExecutor.cpp
+        src/simulation/generation/OrderGenerator.cpp
+        src/simulation/direct_execution/OrderExecutor.cpp
+        src/commands/commands.h
+        src/simulation/generation/EventSampler.h
+        src/simulation/generation/MarketState.h
+        src/simulation/generation/OrderRegistry.h
+        src/simulation/generation/RandomEngine.h
+        src/simulation/generation/StreamCommandGenerator.h
+        src/simulation/direct_execution/StreamCommandExecutor.h
 )
 target_compile_options(Orderbook PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(Orderbook PRIVATE orderbook_lib)
 
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
 enable_testing()
 
 add_executable(OrderbookTests
@@ -68,7 +96,6 @@ add_executable(OrderbookTests
 )
 target_compile_options(OrderbookTests PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(OrderbookTests PRIVATE orderbook_lib GTest::gtest_main)
-target_link_libraries(orderbook_lib PUBLIC Boost::unordered)
 
 include(GoogleTest)
 gtest_discover_tests(OrderbookTests)
