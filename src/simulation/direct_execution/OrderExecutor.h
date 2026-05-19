@@ -1,7 +1,7 @@
 #pragma once
 
 #include "orderbook/Orderbook.h"
-#include "../OrderGenerator.h"
+#include "simulation/generation/OrderGenerator.h"
 
 #include <cstddef>
 #include <string>
@@ -16,19 +16,15 @@ public:
     [[nodiscard]] const std::unique_ptr<Orderbook> &getOrderbook() const;
 
 private:
-    std::unique_ptr<Orderbook> orderbook_ = std::make_unique<Orderbook>(true);
+    std::unique_ptr<Orderbook> orderbook_ = std::make_unique<Orderbook>();
     OrderGenerator generator_;
     std::string persist_path_;
 
-    static std::vector<OrderEvent> getOrdersFromCsv(const std::string &path);
+    static std::vector<Command> getCommandsFromCsv(const std::string& path);
 
     double runFromSimulation();
 
-    [[nodiscard]] double executeOrders(const std::vector<OrderEvent> &events) const;
-
-    [[nodiscard]] double executeOrdersPersist(const std::vector<OrderEvent> &events) const;
-
+    [[nodiscard]] double executeCommands(const std::vector<Command>& commands) const;
+    [[nodiscard]] double executeCommandsPersist(const std::vector<Command>& commands) const;
     [[nodiscard]] double runFromCsv(const std::string &csv_path) const;
-
 };
-
