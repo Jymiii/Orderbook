@@ -1,58 +1,29 @@
 #pragma once
 
-#include "../OrderRegistry.h"
+#include "EventSampler.h"
 #include "MarketState.h"
-#include "OrderEvent.h"
-
-#include <random>
+#include "OrderRegistry.h"
+#include "RandomEngine.h"
+#include "commands/commands.h"
 #include <vector>
-#include <array>
 
 class OrderGenerator {
 public:
-    std::vector<OrderEvent> generate();
-
-    OrderGenerator(const MarketState &state, size_t ticks) : state_{state}, ticks_{ticks} {
+    OrderGenerator(const MarketState& state, size_t ticks)
+        : marketState_{state}, ticks_{ticks}
+    {
     }
+
+    std::vector<Command> generate();
 
 private:
     OrderId nextId_{0};
     OrderRegistry registry_{};
-    MarketState state_{};
+    MarketState marketState_{};
     size_t ticks_{};
-
-    std::mt19937 rng_{std::random_device{}()};
-    std::normal_distribution<double> normalDist_{0.0, 1.0};
-    std::uniform_real_distribution<double> uniformSpread_{-0.499999999, 0.5};
-    std::uniform_real_distribution<double> uniformZeroToOne_{0, 1};
-    std::bernoulli_distribution bernoulliDist_{0.5};
-
-
-    static constexpr int eventsPerTick = 10;
-    static constexpr std::array<double, 2> addCancelModOdds{55.0, 45.0};
-
-    std::poisson_distribution<int> eventCountDist_{eventsPerTick};
+    RandomEngine rng_{};
     std::discrete_distribution<int> eventTypeDist_{
-        addCancelModOdds.begin(),
-        addCancelModOdds.end()
+        marketState_.addCancelModOdds.begin(),
+        marketState_.addCancelModOdds.end()
     };
-
-    double getRandom() { return normalDist_(rng_); }
-
-    double getUSample() { return uniformSpread_(rng_); }
-
-    Side getRandomSide();
-
-    void generateAddOrderEvents(double mid, int addCount, std::vector<OrderEvent> &out);
-
-    void generateCancelOrderEvents(int cancelCount, std::vector<OrderEvent> &out);
-
-    void generateModifyOrderEvents(double mid, int modifyCount, std::vector<OrderEvent> &out);
-
-    Price getRandomOrderPrice(double mid, Side side);
-
-    Quantity getRandomQuantity();
-
-    OrderType getRandomOrderType();
 };
-
