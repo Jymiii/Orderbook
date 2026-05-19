@@ -1,0 +1,14 @@
+//
+// Created by jimiv on 19-5-2026.
+//
+
+#ifndef ORDERBOOK_STREAMCOMMANDGENERATOR_H
+#define ORDERBOOK_STREAMCOMMANDGENERATOR_H
+
+
+class StreamCommandGenerator
+{
+};
+
+
+#endif //ORDERBOOK_STREAMCOMMANDGENERATOR_H
