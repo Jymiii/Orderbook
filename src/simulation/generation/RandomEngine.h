@@ -6,8 +6,8 @@
 class RandomEngine
 {
 public:
-    explicit RandomEngine(const std::mt19937::result_type seed = std::random_device{}())
-        : rng_{seed}
+    explicit RandomEngine(const std::mt19937::result_type seed = std::random_device{}(), const double poissonMean = 10.0)
+        : rng_{seed}, poisson_distribution_{poissonMean}
     {
     }
 
@@ -18,10 +18,9 @@ public:
     double uniform01() noexcept { return uniform01Dist_(rng_); }
     bool coinflip() noexcept { return bernoulliDist_(rng_); }
 
-    int poisson(const double mean)
+    int poisson()
     {
-        std::poisson_distribution<int> d{mean};
-        return d(rng_);
+        return poisson_distribution_(rng_);
     }
 
     template <typename Int>
@@ -37,4 +36,5 @@ private:
     std::uniform_real_distribution<double> uniformSpreadDist_{-0.499999999, 0.5};
     std::uniform_real_distribution<double> uniform01Dist_{0.0, 1.0};
     std::bernoulli_distribution bernoulliDist_{0.5};
+    std::poisson_distribution<int> poisson_distribution_{};
 };

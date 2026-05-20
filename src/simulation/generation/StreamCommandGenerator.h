@@ -10,6 +10,7 @@
 #include "spsc_queue.h"
 
 #include <atomic>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -36,15 +37,15 @@ public:
         while (!stop_.load(std::memory_order_acquire))
         {
             mid = es::advanceMid(mid, marketState_, rng_);
-            const int eventCount = rng_.poisson(marketState_.eventsPerTick);
-            const auto c = es::bucketEvents(eventCount, eventTypeDist_, rng_);
+            const int eventCount = rng_.poisson();
+            const auto [add, cancel, modify] = es::bucketEvents(eventCount, eventTypeDist_, rng_);
 
             bucket.clear();
-            bucket.reserve(c.add + c.cancel + c.modify);
+            bucket.reserve(add + cancel + modify);
 
-            es::sampleCancels(c.cancel, registry_, rng_, bucket);
-            es::sampleModifies(mid, c.modify, registry_, marketState_, rng_, bucket);
-            es::sampleAdds(mid, c.add, nextId_, registry_, marketState_, rng_, bucket);
+            es::sampleCancels(cancel, registry_, rng_, bucket);
+            es::sampleModifies(mid, modify, registry_, marketState_, rng_, bucket);
+            es::sampleAdds(mid, add, nextId_, registry_, marketState_, rng_, bucket);
 
             std::ranges::shuffle(bucket, rng_.engine());
 

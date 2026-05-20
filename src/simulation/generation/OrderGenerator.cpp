@@ -15,7 +15,7 @@ std::vector<Command> OrderGenerator::generate()
 
     for (size_t i = 0; i < ticks_; ++i) {
         mid = es::advanceMid(mid, marketState_, rng_);
-        const int eventCount = rng_.poisson(marketState_.eventsPerTick);
+        const int eventCount = rng_.poisson();
         const auto c = es::bucketEvents(eventCount, eventTypeDist_, rng_);
 
         bucket.clear();

@@ -6,13 +6,14 @@
 #include "spsc_queue.h"
 
 #include <atomic>
+#include <iostream>
 #include <thread>
 
 int main()
 {
     spsc_queue<Command> commandQueue{1 << 17};
     constexpr MarketState state{};
-    RandomEngine rng{};
+    RandomEngine rng{state.eventsPerTick};
     std::atomic<bool> stopFlag{false};
     Orderbook orderbook{};
 
@@ -22,6 +23,12 @@ int main()
     std::thread generatorThread{[&generator] { generator.run(); }};
     std::thread executorThread{[&executor] { executor.run(); }};
 
+    char c;
+    while (std::cin.get(c) && c != 'q') {
+        std::cout << "Press 'q' to quit...\n";
+    }
+
+    stopFlag.store(true, std::memory_order_release);
     executorThread.join();
     generatorThread.join();
 }
