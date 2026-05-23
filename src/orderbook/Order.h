@@ -59,7 +59,7 @@ public:
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Order &order) {
-        return os << order.id_ << "," << std::to_underlying(order.type_) << "," << std::to_underlying(order.side_)
+        return os << order.id_ << "," << +std::to_underlying(order.type_) << "," << +std::to_underlying(order.side_)
                << "," << order.price_ << "," << order.remainingQuantity_ << "\n";
     }
 

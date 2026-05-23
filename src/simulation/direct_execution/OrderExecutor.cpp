@@ -6,6 +6,7 @@
 #include "utils/Timer.h"
 
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <utility>
 
@@ -61,8 +62,8 @@ double OrderExecutor::executeCommandsPersist(const std::vector<Command> &command
                            orderbook_->addOrder(Order{c.id, c.type, c.side, c.price, c.quantity});
                            file << 0
                                << ',' << c.id
-                               << ',' << std::to_underlying(c.type)
-                               << ',' << std::to_underlying(c.side)
+                               << ',' << +std::to_underlying(c.type)
+                               << ',' << +std::to_underlying(c.side)
                                << ',' << c.price
                                << ',' << c.quantity << '\n';
                        },
@@ -76,7 +77,7 @@ double OrderExecutor::executeCommandsPersist(const std::vector<Command> &command
                            orderbook_->modifyOrder(OrderModify{c.id, c.side, c.price, c.quantity});
                            file << 2
                                << ',' << c.id
-                               << ',' << std::to_underlying(c.side)
+                               << ',' << +std::to_underlying(c.side)
                                << ',' << c.price
                                << ',' << c.quantity << '\n';
                        }
