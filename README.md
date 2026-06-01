@@ -46,15 +46,15 @@ to the book. The engine itself owns no locks — concurrency is handled entirely
    │  ── generator thread ──  │ ───────────────────────► │  ── executor thread ──   │
    │                          │   spsc_queue<Command>    │                          │
    │  GBM mid-price model     │                          │  std::visit(cmd):        │
-   │  Poisson event bursts    │                          │   NewOrderCmd  ─► add     │
-   │  add / cancel / modify   │                          │   CancelOrderCmd ► cancel │
-   │  OrderRegistry (live ids)│                          │   ModifyOrderCmd ► modify │
-   └──────────────────────────┘                          │   PruneGFDCmd  ─► prune   │
+   │  Poisson event bursts    │                          │   NewOrderCmd  ─► add    │
+   │  add / cancel / modify   │                          │   CancelOrderCmd ► cancel│
+   │  OrderRegistry (live ids)│                          │   ModifyOrderCmd ► modify│
+   └──────────────────────────┘                          │   PruneGFDCmd  ─► prune  │
                                                          └────────────┬─────────────┘
                                                                       │
                                                                       ▼
-   ┌──────────────────────────────────────────────────────────────────────────────┐
-   │                                  Orderbook                                     │
+   ┌────────────────────────────────────────────────────────────────────────────────┐
+   │                             Orderbook                                          │
    │  ┌─────────────────────┐                 ┌─────────────────────────┐           │
    │  │  LevelArray<N,Buy>  │                 │  LevelArray<N,Sell>     │           │
    │  │  (bids_)            │                 │  (asks_)                │           │
@@ -64,7 +64,7 @@ to the book. The engine itself owns no locks — concurrency is handled entirely
    │                                                                                │
    │  orders_: boost::unordered_flat_map<OrderId, list<Order>::iterator>            │
    │  trades_: vector<Trade>                                                        │
-   └──────────────────────────────────────────────────────────────────────────────┘
+   └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 The `Command` type is a `std::variant<NewOrderCmd, CancelOrderCmd, ModifyOrderCmd, PruneGFDCmd>`, dispatched on
